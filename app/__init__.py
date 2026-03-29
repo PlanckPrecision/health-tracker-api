@@ -7,6 +7,8 @@ def create_app():
     from .views import views
     from .auth import auth
 
+    # customize the url and where to find different pages on the website
+
     app.register_blueprint(views, url_prefix='/')
     app.register_blueprint(auth, url_prefix='/')
 
