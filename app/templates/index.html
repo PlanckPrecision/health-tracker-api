@@ -2,10 +2,15 @@
 
 {% block body %}
 
-    <h1>Register</h1>
+    <h1>Enter weight</h1>
     <form action="register" method="post">
         <input autocomplete="off" autofocus name="weight" placeholder="Weight" type="text">
+        <input name="date" type="text" value="{{ today }}" placeholder="DD.MM.YYYY">
         <button type="submit">Register</button>
     </form>
+
+    {% if message %}
+        <p>{{ message }}</p>
+    {% endif %}
 
 {% endblock %}

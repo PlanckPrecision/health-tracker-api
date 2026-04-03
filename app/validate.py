@@ -1,4 +1,5 @@
 from flask import Flask
+from datetime import datetime
 
 def check_weight(weight_str):
     """
@@ -33,3 +34,15 @@ def check_weight(weight_str):
         return False, "Invalid format. Only numbers and ',' are allowed"
 
     return True, val
+
+def check_date(date_raw):
+    date_raw = (date_raw or "").strip()
+
+    if not date_raw:
+        return True, datetime.today().date()
+
+    try:
+        date_obj = datetime.strptime(date_raw, "%d.%m.%Y").date()
+        return True, date_obj
+    except ValueError:
+        return False, "Invalid date format. Use DD.MM.YYYY"
