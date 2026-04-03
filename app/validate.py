@@ -1,5 +1,6 @@
 from flask import Flask
 from datetime import datetime
+import re
 
 def check_weight(weight_str):
     """
@@ -46,3 +47,18 @@ def check_date(date_raw):
         return True, date_obj
     except ValueError:
         return False, "Invalid date format. Use DD.MM.YYYY"
+    
+def is_valid_password(password):
+    """
+    Returns True if the password:
+    - Is at least 6 characters long
+    - Contains at least one letter
+    - Contains at least one special character (non-alphanumeric)
+    """
+    if len(password) < 6:
+        return False
+    if not re.search(r"[A-Za-z]", password):
+        return False
+    if not re.search(r"[^A-Za-z0-9]", password):
+        return False
+    return True
