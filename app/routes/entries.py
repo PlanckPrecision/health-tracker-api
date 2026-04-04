@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for
-from flask_login import login_required, current_user
+from flask_login import current_user
 from datetime import datetime
 from app import db
 from app.models import Entry
@@ -8,13 +8,11 @@ from app.validate import check_weight
 entries_bp = Blueprint("entries", __name__)
 
 @entries_bp.route("/")
-@login_required
 def index():
     today = datetime.now().strftime("%d.%m.%Y")
     return render_template("index.html", today=today)
 
 @entries_bp.route("/register", methods=["POST"])
-@login_required
 def register():
     weight_raw = request.form.get("weight", "").strip()
     date_raw = request.form.get("date", "").strip()
@@ -26,7 +24,11 @@ def register():
             datetime.strptime(date_raw, "%d.%m.%Y")
         except ValueError:
             today = datetime.now().strftime("%d.%m.%Y")
-            return render_template("index.html", message="Invalid date format. Use DD.MM.YYYY", today=today)
+            return render_template(
+                "index.html",
+                message="Invalid date format. Use DD.MM.YYYY",
+                today=today,
+            )
 
     is_valid, result = check_weight(weight_raw)
 
@@ -34,14 +36,25 @@ def register():
         today = datetime.now().strftime("%d.%m.%Y")
         return render_template("index.html", message=result, today=today)
 
-    entry = Entry(weight=result, date=date_raw, user_id=current_user.id)
+    user_id = current_user.id if current_user.is_authenticated else None
+    entry = Entry(weight=result, date=date_raw, user_id=user_id)
     db.session.add(entry)
     db.session.commit()
 
-    return render_template("greet.html", weight=result, date=date_raw)
+    today = datetime.now().strftime("%d.%m.%Y")
+    return render_template(
+        "index.html",
+        today=today,
+        weight=result,
+        date=date_raw,
+    )
 
 @entries_bp.route("/history")
-@login_required
 def history():
-    entries = Entry.query.filter_by(user_id=current_user.id).order_by(Entry.id).all()
+    if current_user.is_authenticated:
+        # Show only logged-in user's entries
+        entries = Entry.query.filter_by(user_id=current_user.id).order_by(Entry.id).all()
+    else:
+        # Show anonymous entries (where user_id is None)
+        entries = Entry.query.filter_by(user_id=None).order_by(Entry.id).all()
     return render_template("history.html", entries=entries)

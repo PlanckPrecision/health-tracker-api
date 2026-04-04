@@ -23,7 +23,4 @@ class Entry(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     weight = db.Column(db.Float, nullable=False)
     date = db.Column(db.String(10), nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
-
-#TO DO: Make relationship between tables where username and 
-# password is stored and where weight is entered
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)

@@ -16,7 +16,7 @@
             {% for entry in entries %}
                 <tr>
                     <td>{{ entry.id }}</td>
-                    <td>{{ entry.user.username }}</td>
+                    <td>{{ entry.user.username if entry.user else "Anonymous" }}</td>
                     <td>{{ entry.weight }}</td>
                     <td>{{ entry.date }}</td>
                 </tr>

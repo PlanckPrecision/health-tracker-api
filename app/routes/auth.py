@@ -58,7 +58,7 @@ def login():
 
         login_user(user)
         flash(f"Welcome, {username}!", "success")
-        return redirect(url_for("entries.index"))
+        return redirect(url_for("entries.history"))
 
     return render_template("login.html")
 
@@ -66,4 +66,4 @@ def login():
 def logout():
     logout_user()
     flash("Logged out successfully", "success")
-    return redirect(url_for("auth.login"))
+    return redirect(url_for("entries.index"))

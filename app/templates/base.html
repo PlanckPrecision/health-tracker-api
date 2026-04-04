@@ -2,10 +2,37 @@
 
 <html lang="en">    
     <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="initial-scale=1, width=device-width">
-        <title>weight</title>
+        <title>Weight</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     </head>
     <body>
+        <nav>
+            <ul>
+                <li><a href="{{ url_for('entries.index') }}">Home</a></li>
+                <li><a href="{{ url_for('entries.history') }}">History</a></li>
+                {% if current_user.is_authenticated %}
+                    <li><a href="{{ url_for('auth.logout') }}">Logout ({{ current_user.username }})</a></li>
+                {% else %}
+                    <li><a href="{{ url_for('auth.login') }}">Login</a></li>
+                    <li><a href="{{ url_for('auth.signup') }}">Sign Up</a></li>
+                {% endif %}
+                <li class="nav-icon">
+                    <img src="{{ url_for('static', filename='miku_icon.png') }}" alt="Icon">
+                </li>
+            </ul>
+        </nav>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <p class="{{ category }}">{{ message }}</p>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
         {% block body %}{% endblock %}
     </body>
 </html>
