@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block body %}
+
+    <h1>Enter weight</h1>
+    <form action="register" method="post">
+        <input autocomplete="off" autofocus name="weight" placeholder="Weight" type="text">
+        <input name="date" type="text" value="{{ today }}">
+        <button type="submit">Register</button>
+    </form>
+
+    {% if weight %}
+  <p>Last entry: {{ weight }} kg on {{ date }}</p>
+    {% endif %}
+
+    {% if message %}
+        <p>{{ message }}</p>
+    {% endif %}
+
+{% endblock %}

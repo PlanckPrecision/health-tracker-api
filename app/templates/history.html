@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block body %}
+
+    <h1>Weight History</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Username</th>
+                <th>Weight</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for entry in entries %}
+                <tr>
+                    <td>{{ entry.id }}</td>
+                    <td>{{ entry.user.username if entry.user else "Anonymous" }}</td>
+                    <td>{{ entry.weight }}</td>
+                    <td>{{ entry.date }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+{% endblock %}
