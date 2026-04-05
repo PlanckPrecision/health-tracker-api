@@ -24,3 +24,10 @@ class Entry(db.Model):
     weight = db.Column(db.Float, nullable=False)
     date = db.Column(db.String(10), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
+
+class Goal(db.Model):
+    __tablename__ = "goals"
+
+    id = db.Column(db.Integer, primary_key=True)
+    goal_weight = db.Column(db.Float, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)

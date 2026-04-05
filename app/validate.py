@@ -32,7 +32,7 @@ def check_weight(weight_str):
             
     except ValueError:
         # This triggers if there are letters, emojis, or multiple separators
-        return False, "Invalid format. Only numbers and ',' are allowed"
+        return False, "Invalid format. Only numbers with maximum of 2 decimal places allowed"
 
     return True, val
 
@@ -43,11 +43,11 @@ def check_date(date_raw):
         return True, datetime.today().date()
 
     try:
-        date_obj = datetime.strptime(date_raw, "%d.%m.%Y").date()
+        date_obj = datetime.strptime(date_raw, "%Y-%m-%d").date()
         return True, date_obj
     except ValueError:
-        return False, "Invalid date format. Use DD.MM.YYYY"
-    
+        return False, "Invalid date format. Use YYYY-MM-DD"
+
 def is_valid_password(password):
     """
     Returns True if the password:

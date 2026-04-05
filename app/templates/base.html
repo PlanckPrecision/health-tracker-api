@@ -6,23 +6,30 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="initial-scale=1, width=device-width">
         <title>Weight</title>
-        <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+        <script src="{{ url_for('static', filename='js/datepicker.js') }}"></script>
     </head>
     <body>
         <nav>
-            <ul>
-                <li><a href="{{ url_for('entries.index') }}">Home</a></li>
-                <li><a href="{{ url_for('entries.history') }}">History</a></li>
-                {% if current_user.is_authenticated %}
-                    <li><a href="{{ url_for('auth.logout') }}">Logout ({{ current_user.username }})</a></li>
-                {% else %}
-                    <li><a href="{{ url_for('auth.login') }}">Login</a></li>
-                    <li><a href="{{ url_for('auth.signup') }}">Sign Up</a></li>
-                {% endif %}
-                <li class="nav-icon">
-                    <img src="{{ url_for('static', filename='miku_icon.png') }}" alt="Icon">
-                </li>
-            </ul>
+        <ul>
+            <li><a href="{{ url_for('entries.index') }}">Home</a></li>
+            <li><a href="{{ url_for('entries.goals') }}">Set goals</a></li>
+            <li><a href="{{ url_for('entries.history') }}">History</a></li>
+
+            <!-- spacer pushes following items to the right -->
+            <li class="spacer"></li>
+
+            {% if current_user.is_authenticated %}
+            <li><a href="{{ url_for('auth.logout') }}">Logout ({{ current_user.username }})</a></li>
+            {% else %}
+            <li><a href="{{ url_for('auth.login') }}">Login</a></li>
+            <li><a href="{{ url_for('auth.signup') }}">Sign Up</a></li>
+            {% endif %}
+            
+            <li class="nav-icon">
+            <img src="{{ url_for('static', filename='images/miku_icon.png') }}" alt="Icon">
+            </li>
+        </ul>
         </nav>
 
         {% with messages = get_flashed_messages(with_categories=true) %}

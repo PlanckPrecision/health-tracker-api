@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for
+from flask import Blueprint, render_template, request, redirect, url_for, jsonify
 from flask_login import current_user
 from datetime import datetime
 from app import db
@@ -26,7 +26,7 @@ def register():
             today = datetime.now().strftime("%d.%m.%Y")
             return render_template(
                 "index.html",
-                message="Invalid date format. Use DD.MM.YYYY",
+                message=f"Invalid date format: '{date_raw}'. Use DD.MM.YYYY",
                 today=today,
             )
 
@@ -58,3 +58,17 @@ def history():
         # Show anonymous entries (where user_id is None)
         entries = Entry.query.filter_by(user_id=None).order_by(Entry.id).all()
     return render_template("history.html", entries=entries)
+
+@entries_bp.route("/api/entries")
+def get_entries_json():
+    if current_user.is_authenticated:
+        entries = Entry.query.filter_by(user_id=current_user.id).order_by(Entry.date).all()
+    else:
+        entries = Entry.query.filter_by(user_id=None).order_by(Entry.date).all()
+    
+    data = [{"date": entry.date, "weight": entry.weight} for entry in entries]
+    return jsonify(data)
+
+@entries_bp.route("/goals")
+def goals():
+    return render_template("goals.html")
