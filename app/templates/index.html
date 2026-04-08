@@ -1,28 +1,56 @@
 {% extends "base.html" %}
 
 {% block body %}
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div class="lg:col-span-1 space-y-6">
+            <div class="glass-panel p-6 rounded-2xl border border-outline-variant/30 shadow-2xl">
+                <h1 class="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-cyan-400">edit_note</span>
+                    Log Entry
+                </h1>
+                
+                <form action="register" method="post" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Weight (kg)</label>
+                        <input autocomplete="off" autofocus name="weight" placeholder="00.0" type="text"
+                               class="w-full bg-surface-container-highest border-outline-variant rounded-xl text-white focus:ring-2 focus:ring-cyan-400 focus:border-transparent transition-all py-3 px-4">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Date</label>
+                        <input id="date-input" name="date" type="text" value="{{ today }}" readonly
+                               class="w-full bg-surface-container-highest/50 border-outline-variant rounded-xl text-slate-400 py-3 px-4 cursor-not-allowed">
+                    </div>
 
-    <h1>Enter weight</h1>
-    <form action="register" method="post">
-        <input autocomplete="off" autofocus name="weight" placeholder="Weight" type="text">
-        <input id="date-input" name="date" type="text" value="{{ today }}" readonly>
-        <button type="submit">Register</button>
-    </form>
+                    <button type="submit" class="w-full bg-primary text-on-primary font-bold py-4 rounded-xl hover:brightness-110 active:scale-[0.98] transition-all shadow-[0_0_20px_rgba(71,234,237,0.3)]">
+                        Register Weight
+                    </button>
+                </form>
 
-    {% if weight %}
-        <p>Last entry: {{ weight }} kg on {{ date }}</p>
-    {% endif %}
+                {% if weight %}
+                <div class="mt-8 pt-6 border-t border-outline-variant/30">
+                    <p class="text-sm text-slate-400">Last entry:</p>
+                    <p class="text-2xl font-bold text-cyan-400">{{ weight }} <span class="text-sm font-normal text-slate-500">kg</span></p>
+                    <p class="text-xs text-slate-500">{{ date }}</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
 
-    {% if message %}
-        <p>{{ message }}</p>
-    {% endif %}
-   
-    <div style="margin: 30px 0; max-width: 800px;">
-        <h2>Weight Progress Chart</h2>
-        <canvas id="weightChart" width="400" height="100"></canvas>
+        <div class="lg:col-span-2">
+            <div class="glass-panel p-6 rounded-2xl border border-outline-variant/30 shadow-2xl h-full">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-bold text-white tracking-tight">Weight Progress Chart</h2>
+                    <span class="text-xs font-medium px-3 py-1 rounded-full bg-cyan-400/10 text-cyan-400 border border-cyan-400/20">Active Trends</span>
+                </div>
+                
+                <div class="relative h-[300px] w-full">
+                    <canvas id="weightChart"></canvas>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="{{ url_for('static', filename='js/chart.js') }}"></script>
-
 {% endblock %}

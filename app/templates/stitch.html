@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>LuminousWeight | Obsidian Turquoise Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "inverse-on-surface": "#2f3133",
+                    "inverse-surface": "#e2e2e5",
+                    "tertiary-fixed-dim": "#96d1d3",
+                    "on-surface": "#e2e2e5",
+                    "on-tertiary-fixed-variant": "#084f51",
+                    "surface-container-lowest": "#0c0e10",
+                    "on-primary": "#003738",
+                    "surface-container": "#1e2022",
+                    "on-tertiary": "#003738",
+                    "surface": "#121416",
+                    "tertiary-fixed": "#b1edef",
+                    "background": "#121416",
+                    "on-tertiary-container": "#0e5254",
+                    "tertiary-container": "#89c4c6",
+                    "surface-bright": "#38393c",
+                    "surface-container-high": "#282a2c",
+                    "primary-fixed-dim": "#2ddbde",
+                    "secondary-fixed": "#d7e4f0",
+                    "on-surface-variant": "#bac9c9",
+                    "surface-tint": "#2ddbde",
+                    "secondary-fixed-dim": "#bbc8d4",
+                    "surface-container-highest": "#333537",
+                    "on-secondary-fixed-variant": "#3c4852",
+                    "outline": "#859493",
+                    "error": "#ffb4ab",
+                    "outline-variant": "#3b4949",
+                    "on-background": "#e2e2e5",
+                    "surface-dim": "#121416",
+                    "on-error": "#690005",
+                    "on-secondary-container": "#aab7c2",
+                    "error-container": "#93000a",
+                    "surface-variant": "#333537",
+                    "on-primary-container": "#005354",
+                    "on-error-container": "#ffdad6",
+                    "on-primary-fixed": "#002020",
+                    "on-secondary-fixed": "#111d26",
+                    "on-tertiary-fixed": "#002021",
+                    "primary": "#47eaed",
+                    "secondary": "#bbc8d4",
+                    "surface-container-low": "#1a1c1e",
+                    "tertiary": "#a4e0e2",
+                    "inverse-primary": "#00696b",
+                    "primary-fixed": "#5af8fb",
+                    "secondary-container": "#3c4852",
+                    "primary-container": "#00ced1",
+                    "on-primary-fixed-variant": "#004f51",
+                    "on-secondary": "#26323b"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Manrope"],
+                    "body": ["Manrope"],
+                    "label": ["Manrope"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Manrope', sans-serif; background-color: #121416; color: #e2e2e5; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .bg-obsidian-vignette {
+            background: radial-gradient(circle at top center, #1a1c1e 0%, #121416 100%);
+        }
+        .glass-panel {
+            backdrop-filter: blur(20px);
+            background: rgba(30, 32, 34, 0.7);
+        }
+    </style>
+</head>
+<body class="bg-obsidian-vignette min-h-screen">
+<!-- TopNavBar -->
+<nav class="fixed top-0 w-full z-50 bg-[#121416]/80 backdrop-blur-xl shadow-[0_20px_40px_rgba(0,0,0,0.06)]">
+<div class="flex justify-between items-center px-8 py-4 max-w-7xl mx-auto">
+<div class="text-2xl font-bold tracking-tighter text-cyan-400 font-headline">LuminousWeight</div>
+<div class="hidden md:flex items-center space-x-8">
+<a class="text-cyan-400 border-b-2 border-cyan-400 pb-1 font-manrope tracking-tight hover:text-cyan-300 transition-colors duration-300" href="#">Dashboard</a>
+<a class="text-slate-400 font-manrope tracking-tight hover:text-cyan-300 transition-colors duration-300" href="#">Log Weight</a>
+<a class="text-slate-400 font-manrope tracking-tight hover:text-cyan-300 transition-colors duration-300" href="#">Trends</a>
+<a class="text-slate-400 font-manrope tracking-tight hover:text-cyan-300 transition-colors duration-300" href="#">Goals</a>
+</div>
+<div class="flex items-center space-x-4">
+<button class="text-slate-400 hover:text-cyan-400 transition-colors scale-95 active:scale-90 transition-transform">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="text-slate-400 hover:text-cyan-400 transition-colors scale-95 active:scale-90 transition-transform">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<div class="h-8 w-8 rounded-full overflow-hidden border border-outline-variant/20">
+<img alt="User profile" class="w-full h-full object-cover" data-alt="professional portrait of a person with calm expression, high-end studio lighting on dark background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDtvsmqCNaSdio6ajNYx7raqiNka_WmeEkk2E0caloyguPuAQJFGGrWOrEPv6S3iPkGegxHExZSaAW_viNCVIdzWepXakKDCdBnJzFv7BtFfDIquAZnUFSn9ghvo8OI7AAAGcDZ9BHeAxCwCrSf2a7mCjT-IhLp6V6mtutbqYwo3hZu5JKPNm8xwAmM88e6WvgVHdwXDa-No2PNaOJZwH8ObFikqaJeMb-xnve__lcmHTJmDcF8IEh1iWGznwMflzNfMCB0EOudo-ZY"/>
+</div>
+</div>
+</div>
+</nav>
+<main class="pt-24 pb-16 px-6 max-w-7xl mx-auto space-y-8">
+<!-- Hero / Header Section -->
+<header class="space-y-2">
+<div class="label-sm text-primary tracking-[0.2em] uppercase font-semibold text-xs">Overview</div>
+<h1 class="text-4xl md:text-5xl font-extrabold tracking-tighter text-on-surface">Welcome back, Curator.</h1>
+<p class="text-secondary max-w-xl text-lg font-light leading-relaxed">Your journey toward subterranean radiance continues. You're 2.4kg away from your target.</p>
+</header>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+<!-- Widget 1: Daily Log (Large Left Column) -->
+<div class="md:col-span-4 space-y-6">
+<div class="bg-surface-container-low p-8 rounded-xl shadow-2xl relative overflow-hidden group">
+<div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-16 -mt-16 blur-3xl"></div>
+<h2 class="text-xl font-bold mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">edit_note</span>
+                        Daily Log
+                    </h2>
+<form class="space-y-6">
+<div class="space-y-2">
+<label class="text-xs uppercase tracking-widest text-slate-500 font-bold">Today's Weight (kg)</label>
+<input class="w-full bg-surface-container-highest border border-outline-variant/15 rounded-lg py-4 px-5 text-2xl font-bold focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all placeholder:text-slate-600" placeholder="00.0" step="0.1" type="number"/>
+</div>
+<div class="space-y-2">
+<label class="text-xs uppercase tracking-widest text-slate-500 font-bold">Condition / Mood</label>
+<div class="flex flex-wrap gap-2">
+<button class="px-4 py-2 rounded-full text-xs font-bold bg-primary text-on-primary shadow-[0_0_15px_rgba(71,234,237,0.3)]" type="button">Energetic</button>
+<button class="px-4 py-2 rounded-full text-xs font-bold bg-surface-container-high text-on-surface hover:bg-surface-container-highest transition-colors" type="button">Tired</button>
+<button class="px-4 py-2 rounded-full text-xs font-bold bg-surface-container-high text-on-surface hover:bg-surface-container-highest transition-colors" type="button">Strong</button>
+</div>
+</div>
+<button class="w-full bg-gradient-to-br from-primary to-primary-container text-on-primary font-bold py-4 rounded-lg shadow-lg hover:shadow-primary/20 transition-all flex justify-center items-center gap-2">
+                            Commit Entry
+                        </button>
+</form>
+</div>
+<div class="bg-surface-container-low p-8 rounded-xl flex items-center justify-between">
+<div>
+<div class="text-xs uppercase tracking-widest text-slate-500 font-bold mb-1">Consistency</div>
+<div class="text-2xl font-extrabold text-on-surface">14 Days</div>
+</div>
+<div class="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">workspace_premium</span>
+</div>
+</div>
+</div>
+<!-- Widget 3: Weight Graph (Main Center/Right) -->
+<div class="md:col-span-8 space-y-6">
+<div class="bg-surface-container-low p-8 rounded-xl shadow-2xl min-h-[400px] flex flex-col relative overflow-hidden">
+<div class="flex justify-between items-start mb-8">
+<div>
+<h2 class="text-xl font-bold flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">query_stats</span>
+                                Weight Development
+                            </h2>
+<p class="text-slate-500 text-sm">Last 30 Days</p>
+</div>
+<div class="flex gap-2">
+<span class="bg-surface-container-high px-3 py-1 rounded text-xs font-medium text-slate-300">7D</span>
+<span class="bg-primary/20 text-primary px-3 py-1 rounded text-xs font-bold">30D</span>
+<span class="bg-surface-container-high px-3 py-1 rounded text-xs font-medium text-slate-300">1Y</span>
+</div>
+</div>
+<!-- Simplified Data Visualization Placeholder -->
+<div class="flex-grow flex items-end justify-between gap-2 pt-8 pb-4 relative">
+<!-- Simulated Grid Lines -->
+<div class="absolute inset-0 flex flex-col justify-between opacity-5 pointer-events-none">
+<div class="border-t border-slate-300 w-full"></div>
+<div class="border-t border-slate-300 w-full"></div>
+<div class="border-t border-slate-300 w-full"></div>
+<div class="border-t border-slate-300 w-full"></div>
+</div>
+<!-- Bar Graph Representation with Gradient -->
+<div class="w-full h-full flex items-end justify-between gap-1 px-2 relative z-10">
+<div class="w-full bg-gradient-to-t from-primary/5 to-primary/40 rounded-t-sm" style="height: 70%"></div>
+<div class="w-full bg-gradient-to-t from-primary/5 to-primary/35 rounded-t-sm" style="height: 68%"></div>
+<div class="w-full bg-gradient-to-t from-primary/5 to-primary/50 rounded-t-sm" style="height: 72%"></div>
+<div class="w-full bg-gradient-to-t from-primary/5 to-primary/45 rounded-t-sm" style="height: 65%"></div>
+<div class="w-full bg-gradient-to-t from-primary/5 to-primary/60 rounded-t-sm" style="height: 80%"></div>
+<div class="w-full bg-gradient-to-t from-primary/5 to-primary/55 rounded-t-sm" style="height: 78%"></div>
+<div class="w-full bg-gradient-to-t from-primary/5 to-primary/40 rounded-t-sm" style="height: 70%"></div>
+<div class="w-full bg-gradient-to-t from-primary/5 to-primary/30 rounded-t-sm" style="height: 60%"></div>
+<div class="w-full bg-gradient-to-t from-primary/5 to-primary/25 rounded-t-sm" style="height: 58%"></div>
+<div class="w-full bg-gradient-to-t from-primary/5 to-primary/40 rounded-t-sm" style="height: 65%"></div>
+<div class="w-full bg-gradient-to-t from-primary/5 to-primary/50 rounded-t-sm" style="height: 70%"></div>
+<div class="w-full bg-gradient-to-t from-primary/5 to-primary/70 rounded-t-sm" style="height: 85%"></div>
+<div class="w-full bg-gradient-to-t from-primary/5 to-primary/65 rounded-t-sm" style="height: 82%"></div>
+<div class="w-full bg-gradient-to-t from-primary/5 to-primary/60 rounded-t-sm" style="height: 78%"></div>
+<div class="w-full bg-gradient-to-t from-primary/5 to-primary/55 rounded-t-sm" style="height: 74%"></div>
+</div>
+</div>
+<div class="flex justify-between text-[10px] text-slate-500 uppercase tracking-widest mt-4">
+<span>Oct 01</span>
+<span>Oct 15</span>
+<span>Today</span>
+</div>
+</div>
+<!-- Widget 2: Insights (Horizontal Flex) -->
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+<div class="bg-surface-container-low p-6 rounded-xl border-l-4 border-primary/40">
+<div class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">7-Day Avg</div>
+<div class="text-3xl font-extrabold text-on-surface">78.4<span class="text-sm font-normal text-slate-500 ml-1">kg</span></div>
+<div class="flex items-center text-xs text-primary mt-2">
+<span class="material-symbols-outlined text-sm">trending_down</span>
+<span class="ml-1">-0.5kg from last week</span>
+</div>
+</div>
+<div class="bg-surface-container-low p-6 rounded-xl">
+<div class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">30-Day Avg</div>
+<div class="text-3xl font-extrabold text-on-surface">79.1<span class="text-sm font-normal text-slate-500 ml-1">kg</span></div>
+<div class="flex items-center text-xs text-slate-500 mt-2">
+<span class="material-symbols-outlined text-sm">remove</span>
+<span class="ml-1">Stable trend</span>
+</div>
+</div>
+<div class="bg-surface-container-low p-6 rounded-xl">
+<div class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Total Avg</div>
+<div class="text-3xl font-extrabold text-on-surface">81.2<span class="text-sm font-normal text-slate-500 ml-1">kg</span></div>
+<div class="flex items-center text-xs text-primary mt-2">
+<span class="material-symbols-outlined text-sm">trending_down</span>
+<span class="ml-1">Overall -2.8kg</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Asymmetric Detail Section -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-12 py-12 items-center">
+<div class="relative rounded-2xl overflow-hidden aspect-video shadow-2xl group">
+<img alt="Meditation scene" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" data-alt="minimalist dark aesthetic of calm water ripples at night under a blue moonlight, very moody and atmospheric" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDCaGWd_ZQz7IDIfKXY_0bud6bubwp7yCvO0OXFhOHUpxi8C0wvgdqfCl4K2jX2f06NConnxD-bCy43jD4mssDeS4g6iYMyQ99Im5Ud5HDIGReiLH65tISVBO66cImLAJuR4PpCbgv5OGia-9ppZE_V3WsRZtoIEIvvTHurqr1tE4wS1HOwgRarvepaqy_J6lagnZqeLkhrzBXKGURlaPzchkSIxYNd7j6BD6xba9nuEDGoMPW_FIL1P3uC5aAoqundwv_DNSX0EXiJ"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface to-transparent opacity-60"></div>
+<div class="absolute bottom-6 left-6 right-6">
+<div class="bg-surface-container-high/60 backdrop-blur-md p-4 rounded-lg">
+<p class="text-sm font-medium italic text-on-surface">"The body is a vessel for the light we cultivate within."</p>
+</div>
+</div>
+</div>
+<div class="space-y-6">
+<h3 class="text-3xl font-bold tracking-tight text-on-surface">Intelligent Forecasting</h3>
+<p class="text-secondary leading-relaxed">Based on your last 14 days of entry, our model predicts you will reach your target weight of <span class="text-primary font-bold">76.0kg</span> by December 12th. Maintain your current activity level to stay on track.</p>
+<div class="flex items-center gap-4">
+<div class="h-1 w-full bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-primary" style="width: 65%"></div>
+</div>
+<span class="text-xs font-bold text-primary whitespace-nowrap">65% TO GOAL</span>
+</div>
+<button class="text-primary text-sm font-bold uppercase tracking-widest flex items-center gap-2 hover:gap-4 transition-all">
+                    View Detailed Analytics <span class="material-symbols-outlined">arrow_forward</span>
+</button>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="bg-[#121416] w-full py-12 border-t border-cyan-900/15">
+<div class="flex flex-col md:flex-row justify-between items-center px-8 max-w-7xl mx-auto gap-8">
+<div class="text-cyan-400 font-bold text-lg font-headline">LuminousWeight</div>
+<div class="flex gap-8">
+<a class="font-manrope text-xs uppercase tracking-widest text-slate-500 hover:text-cyan-400 transition-colors opacity-80 hover:opacity-100" href="#">Privacy Policy</a>
+<a class="font-manrope text-xs uppercase tracking-widest text-slate-500 hover:text-cyan-400 transition-colors opacity-80 hover:opacity-100" href="#">Terms of Service</a>
+<a class="font-manrope text-xs uppercase tracking-widest text-slate-500 hover:text-cyan-400 transition-colors opacity-80 hover:opacity-100" href="#">Support</a>
+</div>
+<div class="font-manrope text-xs uppercase tracking-widest text-slate-500">
+                © 2024 Luminous Obsidian. All rights reserved.
+            </div>
+</div>
+</footer>
+</body></html>
