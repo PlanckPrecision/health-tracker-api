@@ -17,6 +17,7 @@ def register():
     weight_raw = request.form.get("weight", "").strip()
     date_raw = request.form.get("date", "").strip()
 
+    # 1. Handle default date
     if not date_raw:
         date_raw = datetime.now().strftime("%d.%m.%Y")
     else:
@@ -30,15 +31,28 @@ def register():
                 today=today,
             )
 
+    # 2. Validate weight
     is_valid, result = check_weight(weight_raw)
-
     if not is_valid:
         today = datetime.now().strftime("%d.%m.%Y")
         return render_template("index.html", message=result, today=today)
 
     user_id = current_user.id if current_user.is_authenticated else None
-    entry = Entry(weight=result, date=date_raw, user_id=user_id)
-    db.session.add(entry)
+
+    # 3. Check for existing entry for this user on this date
+    existing_entry = Entry.query.filter_by(date=date_raw, user_id=user_id).first()
+
+    if existing_entry:
+        # Update the existing record
+        existing_entry.weight = result
+        message = f"Updated weight for {date_raw} to {result} kg."
+    else:
+        # Create a new record
+        new_entry = Entry(weight=result, date=date_raw, user_id=user_id)
+        db.session.add(new_entry)
+        message = f"Registered {result} kg for {date_raw}."
+
+    # 4. Commit changes to the database
     db.session.commit()
 
     today = datetime.now().strftime("%d.%m.%Y")
@@ -47,6 +61,7 @@ def register():
         today=today,
         weight=result,
         date=date_raw,
+        message=message # Added a message to show if it was updated or new
     )
 
 @entries_bp.route("/history")
@@ -71,4 +86,5 @@ def get_entries_json():
 
 @entries_bp.route("/goals")
 def goals():
-    return render_template("goals.html")
+    goals_raw = request.form.get("goal_weight", "").strip()
+    return render_template("goals.html", goal_weight=goals_raw)

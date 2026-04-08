@@ -1,6 +1,12 @@
 {% extends "base.html" %}
 
 {% block body %}
+<!-- Hero / Header Section -->
+<header class="space-y-2">
+<div class="label-sm text-primary tracking-[0.2em] uppercase font-semibold text-xs">Overview</div>
+<h1 class="text-4xl md:text-5xl font-extrabold tracking-tighter text-on-surface">Welcome back, Curator.</h1>
+<p class="text-secondary max-w-xl text-lg font-light leading-relaxed">Your journey towards enlightenment continues. You're 2.4kg away from your target.</p>
+</header>
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div class="lg:col-span-1 space-y-6">
             <div class="glass-panel p-6 rounded-2xl border border-outline-variant/30 shadow-2xl">
@@ -50,6 +56,80 @@
             </div>
         </div>
     </div>
+
+    <!-- widget 2 progression-->
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-6 bg-surface-container-low p-4 rounded-2xl">
+  
+  <div class="glass-panel p-6 rounded-xl border-l-4 border-primary/40">
+    <div class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">7-Day Avg</div>
+    <div class="text-3xl font-extrabold text-on-surface">78.4<span class="text-sm font-normal text-slate-500 ml-1">kg</span></div>
+    <div class="flex items-center text-xs text-primary mt-2">
+      <span class="material-symbols-outlined text-sm">trending_down</span>
+      <span class="ml-1">-0.5kg from last week</span>
+    </div>
+  </div>
+
+  <div class="glass-panel p-6 rounded-2xl border border-outline-variant/30 shadow-2xl">
+    <div class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">30-Day Avg</div>
+    <div class="text-3xl font-extrabold text-on-surface">79.1<span class="text-sm font-normal text-slate-500 ml-1">kg</span></div>
+    <div class="flex items-center text-xs text-slate-500 mt-2">
+      <span class="material-symbols-outlined text-sm">remove</span>
+      <span class="ml-1">Stable trend</span>
+    </div>
+  </div>
+
+  <div class="glass-panel p-6 rounded-2xl border border-outline-variant/30 shadow-2xl">
+    <div class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Total Avg</div>
+    <div class="text-3xl font-extrabold text-on-surface">81.2<span class="text-sm font-normal text-slate-500 ml-1">kg</span></div>
+    <div class="flex items-center text-xs text-primary mt-2">
+      <span class="material-symbols-outlined text-sm">trending_down</span>
+      <span class="ml-1">Overall -2.8kg</span>
+    </div>
+  </div>
+
+</div>
+
+    <!-- Asymmetric Detail Section -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-12 py-12 items-center">
+    <div class="relative rounded-2xl overflow-hidden aspect-video shadow-2xl group">
+    <img alt="Mountain" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" src="static/images/mountain.jpg"/>
+    <div class="absolute inset-0 bg-gradient-to-t from-surface to-transparent opacity-60"></div>
+    <div class="absolute bottom-6 left-6 right-6">
+    <div class="bg-surface-container-high/60 backdrop-blur-md p-4 rounded-lg">
+    <p class="text-sm font-medium italic text-on-surface">"The body is a vessel for the light we cultivate within."</p>
+    </div>
+    </div>
+    </div>
+    <div class="space-y-6">
+    <h3 class="text-3xl font-bold tracking-tight text-on-surface">Intelligent Forecasting</h3>
+    <p class="text-secondary leading-relaxed">Based on your last 14 days of entry, our model predicts you will reach your target weight of <span class="text-primary font-bold">76.0kg</span> by December 12th. Maintain your current activity level to stay on track.</p>
+    <div class="flex items-center gap-4">
+    <div class="h-1 w-full bg-surface-container-high rounded-full overflow-hidden">
+    <div class="h-full bg-primary" style="width: 65%"></div>
+    </div>
+    <span class="text-xs font-bold text-primary whitespace-nowrap">65% TO GOAL</span>
+    </div>
+    <button class="text-primary text-sm font-bold uppercase tracking-widest flex items-center gap-2 hover:gap-4 transition-all">
+                        View Detailed Analytics <span class="material-symbols-outlined">arrow_forward</span>
+    </button>
+    </div>
+    </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-[#121416] w-full py-12 border-t border-cyan-900/15">
+    <div class="flex flex-col md:flex-row justify-between items-center px-8 max-w-7xl mx-auto gap-8">
+    <div class="text-cyan-400 font-bold text-lg font-headline">Weightly</div>
+    <div class="flex gap-8">
+    <a class="font-manrope text-xs uppercase tracking-widest text-slate-500 hover:text-cyan-400 transition-colors opacity-80 hover:opacity-100" href="#">Privacy Policy</a>
+    <a class="font-manrope text-xs uppercase tracking-widest text-slate-500 hover:text-cyan-400 transition-colors opacity-80 hover:opacity-100" href="#">Terms of Service</a>
+    <a class="font-manrope text-xs uppercase tracking-widest text-slate-500 hover:text-cyan-400 transition-colors opacity-80 hover:opacity-100" href="#">Support</a>
+    </div>
+    <div class="font-manrope text-xs uppercase tracking-widest text-slate-500">
+                    © 2026 Weightly. All rights reserved.
+                </div>
+    </div>
+    </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="{{ url_for('static', filename='js/chart.js') }}"></script>
