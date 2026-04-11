@@ -4,8 +4,23 @@
 <!-- Hero / Header Section -->
 <header class="space-y-2">
 <div class="label-sm text-primary tracking-[0.2em] uppercase font-semibold text-xs">Overview</div>
-<h1 class="text-4xl md:text-5xl font-extrabold tracking-tighter text-on-surface">Welcome back, Curator.</h1>
-<p class="text-secondary max-w-xl text-lg font-light leading-relaxed">Your journey towards enlightenment continues. You're 2.4kg away from your target.</p>
+<h1 class="text-4xl md:text-5xl font-extrabold tracking-tighter text-on-surface">Welcome back {{ user }} ,</h1>
+<p class="text-secondary max-w-xl text-lg font-light leading-relaxed">
+  {% if stats.weight_change_from_start is not none %}
+    {% if stats.weight_change_from_start < 0 %}
+      Your journey towards enlightenment continues. Total weight lost:
+      <span class="text-primary font-semibold">{{ "%.2f"|format(stats.weight_change_from_start|abs) }} kg</span>.
+    {% elif stats.weight_change_from_start > 0 %}
+      Your journey towards enlightenment continues. Total weight gained:
+      <span class="text-error font-semibold">+{{ "%.2f"|format(stats.weight_change_from_start) }} kg</span>
+      from your starting weight.
+    {% else %}
+      Your journey towards enlightenment continues. No change from your starting weight yet.
+    {% endif %}
+  {% else %}
+    Your goal is still unknown, traveler.
+  {% endif %}
+</p>
 </header>
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div class="lg:col-span-1 space-y-6">
@@ -14,14 +29,14 @@
                     <span class="material-symbols-outlined text-cyan-400">edit_note</span>
                     Log Entry
                 </h1>
-                
+
                 <form action="register" method="post" class="space-y-4">
                     <div>
                         <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Weight (kg)</label>
                         <input autocomplete="off" autofocus name="weight" placeholder="00.0" type="text"
                                class="w-full bg-surface-container-highest border-outline-variant rounded-xl text-white focus:ring-2 focus:ring-cyan-400 focus:border-transparent transition-all py-3 px-4">
                     </div>
-                    
+
                     <div>
                         <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Date</label>
                         <input id="date-input" name="date" type="text" value="{{ today }}" readonly
@@ -49,7 +64,7 @@
                     <h2 class="text-xl font-bold text-white tracking-tight">Weight Progress Chart</h2>
                     <span class="text-xs font-medium px-3 py-1 rounded-full bg-cyan-400/10 text-cyan-400 border border-cyan-400/20">Active Trends</span>
                 </div>
-                
+
                 <div class="relative h-[300px] w-full">
                     <canvas id="weightChart"></canvas>
                 </div>
@@ -59,31 +74,48 @@
 
     <!-- widget 2 progression-->
 <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 bg-surface-container-low p-4 rounded-2xl">
-  
-  <div class="glass-panel p-6 rounded-xl border-l-4 border-primary/40">
-    <div class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">7-Day Avg</div>
-    <div class="text-3xl font-extrabold text-on-surface">78.4<span class="text-sm font-normal text-slate-500 ml-1">kg</span></div>
-    <div class="flex items-center text-xs text-primary mt-2">
-      <span class="material-symbols-outlined text-sm">trending_down</span>
-      <span class="ml-1">-0.5kg from last week</span>
-    </div>
-  </div>
 
-  <div class="glass-panel p-6 rounded-2xl border border-outline-variant/30 shadow-2xl">
-    <div class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">30-Day Avg</div>
-    <div class="text-3xl font-extrabold text-on-surface">79.1<span class="text-sm font-normal text-slate-500 ml-1">kg</span></div>
+  <!-- 1. Starting Weight -->
+  <div class="glass-panel p-6 rounded-2xl border border-outline-variant/30 border-l-4 border-l-primary shadow-2xl">
+    <div class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Starting Weight</div>
+    <div class="text-3xl font-extrabold text-on-surface">
+      {{ "%.2f"|format(stats.starting_weight) }}<span class="text-sm font-normal text-slate-500 ml-1">kg</span>
+    </div>
     <div class="flex items-center text-xs text-slate-500 mt-2">
-      <span class="material-symbols-outlined text-sm">remove</span>
-      <span class="ml-1">Stable trend</span>
+      <span class="material-symbols-outlined text-sm">flag</span>
+      <span class="ml-1">Baseline from goal or first entry</span>
     </div>
   </div>
 
+  <!-- 2. Weekly Pace -->
+  <div class="glass-panel p-6 rounded-xl border-l-4 {% if stats.weekly_trend == 'down' %}border-green-400{% elif stats.weekly_trend == 'up' %}border-error{% else %}border-outline-variant/40{% endif %}">
+    <div class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Weekly Pace</div>
+    <div class="text-3xl font-extrabold {% if stats.weekly_trend == 'down' %}text-green-400{% elif stats.weekly_trend == 'up' %}text-error{% else %}text-on-surface{% endif %}">
+      {% if stats.weekly_pace is not none %}
+        {{ "%+.2f"|format(stats.weekly_pace) }}<span class="text-sm font-normal text-slate-500 ml-1">kg</span>
+      {% else %}
+        <span class="text-slate-500 text-xl">—</span>
+      {% endif %}
+    </div>
+    <div class="flex items-center text-xs mt-2 {% if stats.weekly_trend == 'down' %}text-green-400{% elif stats.weekly_trend == 'up' %}text-error{% else %}text-slate-500{% endif %}">
+      <span class="material-symbols-outlined text-sm">{% if stats.weekly_trend == 'down' %}trending_down{% elif stats.weekly_trend == 'up' %}trending_up{% else %}remove{% endif %}</span>
+      <span class="ml-1">{{ stats.weekly_pace_label }}</span>
+    </div>
+  </div>
+
+  <!-- 3. 7-Day Average -->
   <div class="glass-panel p-6 rounded-2xl border border-outline-variant/30 shadow-2xl">
-    <div class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Total Avg</div>
-    <div class="text-3xl font-extrabold text-on-surface">81.2<span class="text-sm font-normal text-slate-500 ml-1">kg</span></div>
+    <div class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">7-Day Avg</div>
+    <div class="text-3xl font-extrabold text-on-surface">
+      {% if stats.seven_day_avg %}
+        {{ "%.2f"|format(stats.seven_day_avg) }}<span class="text-sm font-normal text-slate-500 ml-1">kg</span>
+      {% else %}
+        <span class="text-slate-500 text-xl">N/A</span>
+      {% endif %}
+    </div>
     <div class="flex items-center text-xs text-primary mt-2">
-      <span class="material-symbols-outlined text-sm">trending_down</span>
-      <span class="ml-1">Overall -2.8kg</span>
+      <span class="material-symbols-outlined text-sm">avg_pace</span>
+      <span class="ml-1">Rolling 7-day window</span>
     </div>
   </div>
 
@@ -119,14 +151,14 @@
     <!-- Footer -->
     <footer class="bg-[#121416] w-full py-12 border-t border-cyan-900/15">
     <div class="flex flex-col md:flex-row justify-between items-center px-8 max-w-7xl mx-auto gap-8">
-    <div class="text-cyan-400 font-bold text-lg font-headline">Weightly</div>
+    <div class="text-cyan-400 font-bold text-lg font-headline">Weightborne</div>
     <div class="flex gap-8">
     <a class="font-manrope text-xs uppercase tracking-widest text-slate-500 hover:text-cyan-400 transition-colors opacity-80 hover:opacity-100" href="#">Privacy Policy</a>
     <a class="font-manrope text-xs uppercase tracking-widest text-slate-500 hover:text-cyan-400 transition-colors opacity-80 hover:opacity-100" href="#">Terms of Service</a>
     <a class="font-manrope text-xs uppercase tracking-widest text-slate-500 hover:text-cyan-400 transition-colors opacity-80 hover:opacity-100" href="#">Support</a>
     </div>
     <div class="font-manrope text-xs uppercase tracking-widest text-slate-500">
-                    © 2026 Weightly. All rights reserved.
+                    © 2026 Weighborne All rights reserved.
                 </div>
     </div>
     </footer>

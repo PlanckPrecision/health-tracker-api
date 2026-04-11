@@ -1,4 +1,4 @@
-// Simple European Date Picker (DD.MM.YYYY format)
+// Simple European Date Picker (DD.MM.YYYY format) with Dark/Cyan Theme
 document.addEventListener('DOMContentLoaded', function() {
     const dateInput = document.getElementById('date-input');
     if (!dateInput) return;
@@ -6,17 +6,20 @@ document.addEventListener('DOMContentLoaded', function() {
     // Create date picker container
     const pickerContainer = document.createElement('div');
     pickerContainer.id = 'date-picker';
+    
+    // 1. Updated Container (Dark Theme)
     pickerContainer.style.cssText = `
         position: absolute;
-        background: white;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        padding: 10px;
+        background: #1e293b; /* Slate-800 */
+        border: 2px solid #22d3ee; /* Cyan-400 */
+        border-radius: 12px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        padding: 15px;
         z-index: 1000;
         display: none;
-        font-family: Arial, sans-serif;
-        min-width: 250px;
+        font-family: 'Inter', sans-serif;
+        min-width: 280px;
+        color: white; /* Force text to be white */
     `;
 
     // Create calendar header
@@ -28,24 +31,31 @@ document.addEventListener('DOMContentLoaded', function() {
         margin-bottom: 10px;
     `;
 
+    // 2. Update Header Buttons (Cyan style)
+    const buttonStyle = `
+        border: none;
+        background: #334155;
+        color: #22d3ee;
+        padding: 5px 12px;
+        cursor: pointer;
+        border-radius: 6px;
+        font-weight: bold;
+        font-size: 18px;
+    `;
+
     const prevBtn = document.createElement('button');
     prevBtn.textContent = '‹';
-    prevBtn.style.cssText = `
-        border: none;
-        background: #f0f0f0;
-        padding: 5px 10px;
-        cursor: pointer;
-        border-radius: 3px;
-    `;
+    prevBtn.style.cssText = buttonStyle;
 
     const nextBtn = document.createElement('button');
     nextBtn.textContent = '›';
-    nextBtn.style.cssText = prevBtn.style.cssText;
+    nextBtn.style.cssText = buttonStyle;
 
     const monthYear = document.createElement('span');
     monthYear.style.cssText = `
         font-weight: bold;
         padding: 0 20px;
+        color: #ffffff;
     `;
 
     header.appendChild(prevBtn);
@@ -60,7 +70,7 @@ document.addEventListener('DOMContentLoaded', function() {
         gap: 2px;
     `;
 
-    // Day names
+    // Day names (European style)
     const dayNames = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
     dayNames.forEach(day => {
         const dayEl = document.createElement('div');
@@ -70,6 +80,7 @@ document.addEventListener('DOMContentLoaded', function() {
             padding: 5px;
             font-weight: bold;
             font-size: 12px;
+            color: #94a3b8; /* Slate-400 */
         `;
         calendar.appendChild(dayEl);
     });
@@ -89,7 +100,9 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function parseDate(dateStr) {
-        const [day, month, year] = dateStr.split('.').map(Number);
+        const parts = dateStr.split('.');
+        if (parts.length !== 3) return new Date();
+        const [day, month, year] = parts.map(Number);
         return new Date(year, month - 1, day);
     }
 
@@ -99,6 +112,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         monthYear.textContent = `${['January', 'February', 'March', 'April', 'May', 'June',
             'July', 'August', 'September', 'October', 'November', 'December'][month]} ${year}`;
+        monthYear.style.color = "#ffffff"; // Force white header text
 
         // Clear existing days
         while (calendar.children.length > 7) {
@@ -106,9 +120,11 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         const firstDay = new Date(year, month, 1);
-        const lastDay = new Date(year, month + 1, 0);
-        const startDate = new Date(firstDay);
-        startDate.setDate(startDate.getDate() - firstDay.getDay() + 1); // Start from Monday
+        
+        // Fix for European Monday-start
+        let startOffset = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1;
+        const startDate = new Date(year, month, 1);
+        startDate.setDate(startDate.getDate() - startOffset);
 
         for (let i = 0; i < 42; i++) {
             const dayEl = document.createElement('button');
@@ -116,20 +132,35 @@ document.addEventListener('DOMContentLoaded', function() {
             date.setDate(startDate.getDate() + i);
 
             dayEl.textContent = date.getDate();
+            
+            // Bold Visibility Styles
             dayEl.style.cssText = `
                 border: none;
-                background: ${date.getMonth() === month ? 'white' : '#f5f5f5'};
-                padding: 8px;
+                padding: 10px;
                 cursor: pointer;
-                border-radius: 3px;
+                border-radius: 6px;
                 text-align: center;
-                min-width: 30px;
+                font-weight: 600;
+                transition: all 0.2s;
+                background: ${date.getMonth() === month ? '#334155' : '#1e293b'};
+                color: ${date.getMonth() === month ? 'white' : '#64748b'};
             `;
 
+            // Highlight Selected Date
             if (date.toDateString() === selectedDate.toDateString()) {
-                dayEl.style.background = '#007bff';
-                dayEl.style.color = 'white';
+                dayEl.style.background = '#22d3ee'; // Cyan-400
+                dayEl.style.color = '#000000';    // Dark text on bright background
             }
+
+            // Hover effect
+            dayEl.onmouseover = () => { 
+                if(dayEl.style.background !== 'rgb(34, 211, 238)') dayEl.style.background = '#475569'; 
+            };
+            dayEl.onmouseout = () => { 
+                if(dayEl.style.background !== 'rgb(34, 211, 238)') {
+                    dayEl.style.background = (date.getMonth() === month ? '#334155' : '#1e293b');
+                }
+            };
 
             dayEl.addEventListener('click', () => {
                 selectedDate = new Date(date);
@@ -146,17 +177,19 @@ document.addEventListener('DOMContentLoaded', function() {
         e.stopPropagation();
         const rect = dateInput.getBoundingClientRect();
         pickerContainer.style.left = rect.left + 'px';
-        pickerContainer.style.top = (rect.bottom + 5) + 'px';
+        pickerContainer.style.top = (window.scrollY + rect.bottom + 5) + 'px';
         pickerContainer.style.display = 'block';
         renderCalendar();
     });
 
-    prevBtn.addEventListener('click', () => {
+    prevBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
         currentDate.setMonth(currentDate.getMonth() - 1);
         renderCalendar();
     });
 
-    nextBtn.addEventListener('click', () => {
+    nextBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
         currentDate.setMonth(currentDate.getMonth() + 1);
         renderCalendar();
     });
@@ -168,11 +201,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Initialize with today's date if empty
+    // Initialize
     if (!dateInput.value) {
         dateInput.value = formatDate(new Date());
         selectedDate = new Date();
     } else {
         selectedDate = parseDate(dateInput.value);
+        currentDate = new Date(selectedDate);
     }
 });

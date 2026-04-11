@@ -2,15 +2,13 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_user, logout_user, current_user
 from app import db, login_manager
 from app.models import User
-from app.validate import check_weight, is_valid_password
+from app.validate import is_valid_password
 
 auth_bp = Blueprint("auth", __name__)
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(int(user_id))
-
-from app.validate import is_valid_password  # your password checker
+    return db.session.get(User, int(user_id))
 
 @auth_bp.route("/signup", methods=["GET", "POST"])
 def signup():
@@ -58,7 +56,7 @@ def login():
 
         login_user(user)
         flash(f"Welcome, {username}!", "success")
-        return redirect(url_for("entries.history"))
+        return redirect(url_for("entries.index"))
 
     return render_template("login.html")
 

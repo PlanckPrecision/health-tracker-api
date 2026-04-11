@@ -1,10 +1,11 @@
+{% from "macros.html" import nav_link %}
 <!DOCTYPE html>
 <html class="dark" lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Weightly</title>
-    
+
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
@@ -37,41 +38,40 @@
     </style>
 </head>
 <body class="bg-obsidian-vignette min-h-screen">
-    
+
     <nav class="fixed top-0 w-full z-50 bg-[#121416]/80 backdrop-blur-xl shadow-[0_20px_40px_rgba(0,0,0,0.06)]">
         <div class="flex justify-between items-center px-8 py-4 max-w-7xl mx-auto">
-            <div class="text-2xl font-bold tracking-tighter text-cyan-400 font-headline">Weightly</div>
-            
+            <div class="text-2xl font-bold tracking-tighter text-cyan-400 font-headline">Weightborne</div>
+
             <div class="hidden md:flex items-center space-x-8">
-                <a class="text-cyan-400 border-b-2 border-cyan-400 pb-1 font-headline tracking-tight" href="/">Dashboard</a>
-                <a class="text-slate-400 hover:text-cyan-300 transition-colors duration-300" href="/history">History</a>
-                <a class="text-slate-400 hover:text-cyan-300 transition-colors duration-300" href="/goals">Goals</a>
+                {{ nav_link("Dashboard", ["entries.index", "entries.register"]) }}
+                {{ nav_link("History", ["entries.history"]) }}
+                {{ nav_link("Goals", ["entries.goals"]) }}
             </div>
 
             <div class="flex items-center space-x-4">
-            <a href="/login" class="text-[#bbc8d4] hover:text-[#e2e2e5] transition-colors active:scale-95 transition-transform text-sm font-bold uppercase tracking-widest px-4 py-2">
-                Login
-            </a>
+                {% if current_user.is_authenticated %}
+                    <div class="group relative">
+                        <button class="flex items-center gap-2 text-on-surface/60 hover:text-primary transition-colors active:scale-95">
+                            <div class="h-8 w-8 rounded-full overflow-hidden border border-outline-variant/20">
+                                <img src="{{ url_for('static', filename='images/miku_icon.png') }}" alt="User profile" class="w-full h-full object-cover"/>
+                            </div>
+                            <span class="text-sm font-semibold hidden md:block">{{ current_user.username }}</span>
+                        </button>
 
-            <a href="/signup" class="bg-[#47eaed] text-[#003738] px-6 py-2 rounded-lg font-bold hover:shadow-[0_0_20px_rgba(71,234,237,0.3)] active:scale-95 transition-all">
-                Sign Up
-            </a>
-                
-                <div class="h-10 w-[1px] bg-outline-variant/20 mx-2"></div>
-                
-                <div class="group relative">
-                    <button class="flex items-center space-x-2 text-[#bbc8d4] hover:text-[#47eaed] transition-colors active:scale-95 transition-transform">
-                        <div class="h-8 w-8 rounded-full overflow-hidden border border-outline-variant/20">
-                            <img src="{{ url_for('static', filename='images/miku_icon.png') }}" alt="User profile" class="w-full h-full object-cover"/>
+                        <div class="absolute right-0 mt-2 w-48 bg-surface-container border border-outline-variant/20 rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 py-2">
+                            <div class="h-[1px] bg-outline-variant/10 my-1 mx-2"></div>
+                            <a class="block px-4 py-2 text-sm text-error hover:bg-error/10 transition-colors" href="{{ url_for('auth.logout') }}">Logout</a>
                         </div>
-                    </button>
-                    
-                    <div class="absolute right-0 mt-2 w-48 bg-[#1e2022] border border-outline-variant/20 rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 py-2">
-                        <a class="block px-4 py-2 text-sm text-[#e2e2e5] hover:bg-[#282a2c]/50 transition-colors" href="#">Profile Settings</a>
-                        <div class="h-[1px] bg-outline-variant/10 my-1 mx-2"></div>
-                        <a class="block px-4 py-2 text-sm text-red-400 hover:bg-red-500/10 transition-colors" href="#">Logout</a>
                     </div>
-                </div>
+                {% else %}
+                    <a href="{{ url_for('auth.login') }}" class="text-on-surface/60 hover:text-on-surface transition-colors active:scale-95 text-sm font-bold uppercase tracking-widest px-4 py-2">
+                        Login
+                    </a>
+                    <a href="{{ url_for('auth.signup') }}" class="bg-primary text-on-primary px-6 py-2 rounded-lg font-bold hover:shadow-[0_0_20px_rgba(71,234,237,0.3)] active:scale-95 transition-all">
+                        Sign Up
+                    </a>
+                {% endif %}
             </div>
         </div>
     </nav>

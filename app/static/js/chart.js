@@ -1,23 +1,37 @@
-// Weight Chart - Fetches data from /api/entries and displays as a time series line chart
-document.addEventListener('DOMContentLoaded', function() {
-    const chartContainer = document.getElementById('weightChart');
-    if (!chartContainer) return;
+// Theme tokens — must stay in sync with tailwind.config in base.html
+const THEME = {
+    primary:        '#47eaed',
+    surface:        '#121416',
+    surfaceContainer: '#1e2022',
+    surfaceContainerHighest: '#333537',
+    outlineVariant: '#3b4949',
+    onSurface:      '#e2e2e5',
+    error:          '#ff5252',
+};
 
-    // Fetch entries data from the API endpoint
+document.addEventListener('DOMContentLoaded', () => {
+    const canvas = document.getElementById('weightChart');
+    if (!canvas) return;
+
     fetch('/api/entries')
-        .then(response => response.json())
+        .then(r => r.json())
         .then(data => {
             if (data.length === 0) {
-                chartContainer.innerHTML = '<p>No weight data available</p>';
+                canvas.parentElement.innerHTML =
+                    `<div class="flex items-center justify-center h-full text-slate-500 text-sm">No entries yet — log your first weight to see the chart.</div>`;
                 return;
             }
 
-            // Parse dates and prepare data for the chart
-            const dates = data.map(entry => entry.date);
-            const weights = data.map(entry => entry.weight);
+            const dates   = data.map(e => e.date);
+            const weights = data.map(e => e.weight);
 
-            // Create the chart
-            const ctx = chartContainer.getContext('2d');
+            // Gradient fill: primary at top, transparent at bottom
+            const ctx = canvas.getContext('2d');
+            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.offsetHeight || 300);
+            gradient.addColorStop(0,   'rgba(71, 234, 237, 0.18)');
+            gradient.addColorStop(0.6, 'rgba(71, 234, 237, 0.04)');
+            gradient.addColorStop(1,   'rgba(71, 234, 237, 0)');
+
             new Chart(ctx, {
                 type: 'line',
                 data: {
@@ -25,46 +39,75 @@ document.addEventListener('DOMContentLoaded', function() {
                     datasets: [{
                         label: 'Weight (kg)',
                         data: weights,
-                        borderColor: '#007bff',
-                        backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                        borderColor: THEME.primary,
+                        backgroundColor: gradient,
                         borderWidth: 2,
-                        pointRadius: 5,
-                        pointBackgroundColor: '#007bff',
-                        pointBorderColor: '#fff',
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                        pointBackgroundColor: THEME.surface,
+                        pointBorderColor: THEME.primary,
                         pointBorderWidth: 2,
                         tension: 0.4,
-                        fill: true
+                        fill: true,
                     }]
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
                     plugins: {
                         legend: {
-                            display: true,
-                            position: 'top'
-                        }
+                            display: false,
+                        },
+                        tooltip: {
+                            backgroundColor: THEME.surfaceContainer,
+                            titleColor: THEME.onSurface,
+                            bodyColor: THEME.primary,
+                            borderColor: THEME.outlineVariant,
+                            borderWidth: 1,
+                            padding: 12,
+                            displayColors: false,
+                            callbacks: {
+                                title: items => items[0].label,
+                                label: item => `${item.parsed.y} kg`,
+                            },
+                        },
                     },
                     scales: {
-                        y: {
-                            beginAtZero: false,
-                            title: {
-                                display: true,
-                                text: 'Weight (kg)'
-                            }
-                        },
                         x: {
-                            title: {
-                                display: true,
-                                text: 'Date'
-                            }
-                        }
-                    }
-                }
+                            grid: {
+                                color: `${THEME.outlineVariant}40`,
+                                drawBorder: false,
+                            },
+                            ticks: {
+                                color: '#64748b',
+                                font: { family: 'Manrope', size: 11 },
+                                maxTicksLimit: 8,
+                            },
+                        },
+                        y: {
+                            position: 'right',
+                            beginAtZero: false,
+                            grid: {
+                                color: `${THEME.outlineVariant}40`,
+                                drawBorder: false,
+                            },
+                            ticks: {
+                                color: '#64748b',
+                                font: { family: 'Manrope', size: 11 },
+                                callback: v => `${v} kg`,
+                            },
+                        },
+                    },
+                },
             });
         })
-        .catch(error => {
-            console.error('Error fetching entries:', error);
-            chartContainer.innerHTML = '<p>Error loading chart data</p>';
+        .catch(err => {
+            console.error('Chart fetch failed:', err);
+            canvas.parentElement.innerHTML =
+                `<div class="flex items-center justify-center h-full text-error text-sm">Failed to load chart data.</div>`;
         });
 });
