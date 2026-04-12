@@ -1,0 +1,7 @@
+{% macro nav_link(label, endpoints) %}
+{% set is_active = request.endpoint in endpoints %}
+<a href="{{ url_for(endpoints[0]) }}"
+   class="font-headline tracking-tight transition-colors duration-300 {% if is_active %}text-primary border-b-2 border-primary pb-1{% else %}text-on-surface/60 hover:text-primary{% endif %}">
+    {{ label }}
+</a>
+{% endmacro %}

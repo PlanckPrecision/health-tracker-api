@@ -1,40 +1,100 @@
+{% from "macros.html" import nav_link %}
 <!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weightly</title>
 
-<html lang="en">    
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="initial-scale=1, width=device-width">
-        <title>Weight</title>
-        <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    </head>
-    <body>
-        <nav>
-            <ul>
-                <li><a href="{{ url_for('entries.index') }}">Home</a></li>
-                <li><a href="{{ url_for('entries.history') }}">History</a></li>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script src="{{ url_for('static', filename='js/datepicker.js') }}"></script>
+
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                "primary": "#47eaed",
+                "surface": "#121416",
+                "surface-container": "#1e2022",
+                "surface-container-highest": "#333537",
+                "outline-variant": "#3b4949",
+                "on-surface": "#e2e2e5",
+                "on-primary": "#003738",
+                "error": "#ff5252"
+            },
+            "fontFamily": { "headline": ["Manrope"], "body": ["Manrope"] }
+          },
+        },
+      }
+    </script>
+    <style>
+        body { font-family: 'Manrope', sans-serif; background-color: #121416; color: #e2e2e5; }
+        .bg-obsidian-vignette { background: radial-gradient(circle at top center, #1a1c1e 0%, #121416 100%); }
+        .glass-panel { backdrop-filter: blur(20px); background: rgba(30, 32, 34, 0.7); }
+    </style>
+</head>
+<body class="bg-obsidian-vignette min-h-screen">
+
+    <nav class="fixed top-0 w-full z-50 bg-[#121416]/80 backdrop-blur-xl shadow-[0_20px_40px_rgba(0,0,0,0.06)]">
+        <div class="flex justify-between items-center px-8 py-4 max-w-7xl mx-auto">
+            <div class="text-2xl font-bold tracking-tighter text-cyan-400 font-headline">Weightborne</div>
+
+            <div class="hidden md:flex items-center space-x-8">
+                {{ nav_link("Dashboard", ["entries.index", "entries.register"]) }}
+                {{ nav_link("History", ["entries.history"]) }}
+                {{ nav_link("Goals", ["entries.goals"]) }}
+            </div>
+
+            <div class="flex items-center space-x-4">
                 {% if current_user.is_authenticated %}
-                    <li><a href="{{ url_for('auth.logout') }}">Logout ({{ current_user.username }})</a></li>
-                {% else %}
-                    <li><a href="{{ url_for('auth.login') }}">Login</a></li>
-                    <li><a href="{{ url_for('auth.signup') }}">Sign Up</a></li>
-                {% endif %}
-                <li class="nav-icon">
-                    <img src="{{ url_for('static', filename='miku_icon.png') }}" alt="Icon">
-                </li>
-            </ul>
-        </nav>
+                    <div class="group relative">
+                        <button class="flex items-center gap-2 text-on-surface/60 hover:text-primary transition-colors active:scale-95">
+                            <div class="h-8 w-8 rounded-full overflow-hidden border border-outline-variant/20">
+                                <img src="{{ url_for('static', filename='images/pfp.jpg') }}" alt="User profile" class="w-full h-full object-cover"/>
+                            </div>
+                            <span class="text-sm font-semibold hidden md:block">{{ current_user.username }}</span>
+                        </button>
 
+                        <div class="absolute right-0 mt-2 w-52 bg-surface-container border border-outline-variant/20 rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 py-2">
+                            <a class="flex items-center gap-2 px-4 py-2 text-sm text-on-surface/70 hover:bg-surface-container-highest/50 hover:text-on-surface transition-colors" href="{{ url_for('auth.settings') }}">
+                                <span class="material-symbols-outlined text-base">settings</span>
+                                Settings
+                            </a>
+                            <div class="h-[1px] bg-outline-variant/10 my-1 mx-2"></div>
+                            <a class="flex items-center gap-2 px-4 py-2 text-sm text-error hover:bg-error/10 transition-colors" href="{{ url_for('auth.logout') }}">
+                                <span class="material-symbols-outlined text-base">logout</span>
+                                Logout
+                            </a>
+                        </div>
+                    </div>
+                {% else %}
+                    <a href="{{ url_for('auth.login') }}" class="text-on-surface/60 hover:text-on-surface transition-colors active:scale-95 text-sm font-bold uppercase tracking-widest px-4 py-2">
+                        Login
+                    </a>
+                    <a href="{{ url_for('auth.signup') }}" class="bg-primary text-on-primary px-6 py-2 rounded-lg font-bold hover:shadow-[0_0_20px_rgba(71,234,237,0.3)] active:scale-95 transition-all">
+                        Sign Up
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <main class="pt-24 pb-16 px-6 max-w-7xl mx-auto space-y-8">
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
-                    <p class="{{ category }}">{{ message }}</p>
+                    <div class="p-4 rounded-lg {% if category == 'error' %}bg-red-900/50 text-red-200{% else %}bg-cyan-900/50 text-cyan-200{% endif %}">
+                        {{ message }}
+                    </div>
                 {% endfor %}
             {% endif %}
         {% endwith %}
 
         {% block body %}{% endblock %}
-    </body>
+    </main>
+</body>
 </html>
-
-

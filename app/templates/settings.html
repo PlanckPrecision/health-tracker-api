@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+
+{% block body %}
+<div class="max-w-2xl mx-auto space-y-8">
+
+    <!-- Header -->
+    <div class="space-y-1">
+        <div class="text-primary tracking-[0.2em] uppercase font-semibold text-xs">Account</div>
+        <h1 class="text-4xl font-extrabold tracking-tighter text-on-surface">Settings</h1>
+        <p class="text-on-surface/50 text-sm font-light">Manage your account and data.</p>
+    </div>
+
+    <!-- Flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+            <div class="rounded-xl px-4 py-3 text-sm font-medium
+                {% if category == 'error' %}bg-error/10 text-error border border-error/20
+                {% else %}bg-primary/10 text-primary border border-primary/20{% endif %}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <!-- Change Username -->
+    <div class="glass-panel p-6 rounded-2xl border border-outline-variant/30 space-y-4">
+        <div class="space-y-0.5">
+            <h2 class="text-base font-bold text-on-surface">Change Username</h2>
+            <p class="text-xs text-on-surface/40">Your current username is <span class="text-primary font-semibold">{{ current_user.username }}</span>.</p>
+        </div>
+        <form method="POST" action="{{ url_for('auth.change_username') }}" class="space-y-4">
+            <div>
+                <label class="block text-xs font-semibold uppercase tracking-wider text-on-surface/50 mb-2">New Username</label>
+                <input name="new_username" type="text" required autocomplete="username"
+                       placeholder="new_username" maxlength="80"
+                       class="w-full bg-surface-container-highest border border-outline-variant rounded-xl text-on-surface placeholder-on-surface/30 focus:ring-2 focus:ring-primary focus:border-transparent transition-all py-3 px-4 outline-none">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold uppercase tracking-wider text-on-surface/50 mb-2">Current Password</label>
+                <input name="current_password" type="password" required autocomplete="current-password"
+                       placeholder="••••••••"
+                       class="w-full bg-surface-container-highest border border-outline-variant rounded-xl text-on-surface placeholder-on-surface/30 focus:ring-2 focus:ring-primary focus:border-transparent transition-all py-3 px-4 outline-none">
+            </div>
+            <button type="submit"
+                    class="bg-primary text-on-primary font-bold px-6 py-3 rounded-xl hover:brightness-110 active:scale-[0.98] transition-all text-sm">
+                Update Username
+            </button>
+        </form>
+    </div>
+
+    <!-- Change Password -->
+    <div class="glass-panel p-6 rounded-2xl border border-outline-variant/30 space-y-4">
+        <div class="space-y-0.5">
+            <h2 class="text-base font-bold text-on-surface">Change Password</h2>
+            <p class="text-xs text-on-surface/40">Min. 6 characters, at least one letter and one special character.</p>
+        </div>
+        <form method="POST" action="{{ url_for('auth.change_password') }}" class="space-y-4">
+            <div>
+                <label class="block text-xs font-semibold uppercase tracking-wider text-on-surface/50 mb-2">Current Password</label>
+                <input name="current_password" type="password" required autocomplete="current-password"
+                       placeholder="••••••••"
+                       class="w-full bg-surface-container-highest border border-outline-variant rounded-xl text-on-surface placeholder-on-surface/30 focus:ring-2 focus:ring-primary focus:border-transparent transition-all py-3 px-4 outline-none">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold uppercase tracking-wider text-on-surface/50 mb-2">New Password</label>
+                <input name="new_password" type="password" required autocomplete="new-password"
+                       placeholder="••••••••"
+                       class="w-full bg-surface-container-highest border border-outline-variant rounded-xl text-on-surface placeholder-on-surface/30 focus:ring-2 focus:ring-primary focus:border-transparent transition-all py-3 px-4 outline-none">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold uppercase tracking-wider text-on-surface/50 mb-2">Confirm New Password</label>
+                <input name="confirm_password" type="password" required autocomplete="new-password"
+                       placeholder="••••••••"
+                       class="w-full bg-surface-container-highest border border-outline-variant rounded-xl text-on-surface placeholder-on-surface/30 focus:ring-2 focus:ring-primary focus:border-transparent transition-all py-3 px-4 outline-none">
+            </div>
+            <button type="submit"
+                    class="bg-primary text-on-primary font-bold px-6 py-3 rounded-xl hover:brightness-110 active:scale-[0.98] transition-all text-sm">
+                Change Password
+            </button>
+        </form>
+    </div>
+
+    <!-- Danger Zone -->
+    <div class="glass-panel p-6 rounded-2xl border border-error/30 space-y-4">
+        <div class="space-y-0.5">
+            <h2 class="text-base font-bold text-error">Danger Zone</h2>
+            <p class="text-xs text-on-surface/40">Permanently delete all your entries and goal. This cannot be undone.</p>
+        </div>
+
+        <button type="button" id="reset-toggle"
+                class="bg-error/10 text-error border border-error/30 font-bold px-6 py-3 rounded-xl hover:bg-error/20 active:scale-[0.98] transition-all text-sm">
+            Reset Journey
+        </button>
+
+        <!-- Confirmation form, hidden by default -->
+        <form id="reset-form" method="POST" action="{{ url_for('auth.reset_journey') }}"
+              class="hidden space-y-4 pt-2 border-t border-error/20">
+            <p class="text-xs text-error font-semibold uppercase tracking-wider">Confirm reset</p>
+            <div>
+                <label class="block text-xs font-semibold uppercase tracking-wider text-on-surface/50 mb-2">
+                    Type <span class="text-error font-bold">RESET</span> to confirm
+                </label>
+                <input name="confirmation" type="text" required autocomplete="off"
+                       placeholder="RESET"
+                       class="w-full bg-surface-container-highest border border-error/40 rounded-xl text-on-surface placeholder-on-surface/30 focus:ring-2 focus:ring-error focus:border-transparent transition-all py-3 px-4 outline-none">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold uppercase tracking-wider text-on-surface/50 mb-2">Current Password</label>
+                <input name="current_password" type="password" required autocomplete="current-password"
+                       placeholder="••••••••"
+                       class="w-full bg-surface-container-highest border border-error/40 rounded-xl text-on-surface placeholder-on-surface/30 focus:ring-2 focus:ring-error focus:border-transparent transition-all py-3 px-4 outline-none">
+            </div>
+            <div class="flex items-center gap-3">
+                <button type="submit"
+                        class="bg-error text-white font-bold px-6 py-3 rounded-xl hover:brightness-110 active:scale-[0.98] transition-all text-sm">
+                    Permanently Reset
+                </button>
+                <button type="button" id="reset-cancel"
+                        class="text-on-surface/40 hover:text-on-surface transition-colors text-sm font-semibold px-4 py-3">
+                    Cancel
+                </button>
+            </div>
+        </form>
+    </div>
+
+</div>
+
+<script>
+    const toggle = document.getElementById('reset-toggle');
+    const form = document.getElementById('reset-form');
+    const cancel = document.getElementById('reset-cancel');
+
+    toggle.addEventListener('click', () => {
+        form.classList.remove('hidden');
+        toggle.classList.add('hidden');
+    });
+
+    cancel.addEventListener('click', () => {
+        form.classList.add('hidden');
+        toggle.classList.remove('hidden');
+        form.reset();
+    });
+</script>
+{% endblock %}

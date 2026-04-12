@@ -1,13 +1,67 @@
 {% extends "base.html" %}
 
 {% block body %}
-<h1>Sign Up</h1>
+<div class="flex items-center justify-center min-h-[70vh]">
+    <div class="w-full max-w-md space-y-6">
 
-<form method="POST">
-    <input type="text" name="username" placeholder="Username" required>
-    <input type="password" name="password" placeholder="Password" required>
-    <button type="submit">Sign Up</button>
-</form>
-<p>Already have an account? <a href="{{ url_for('auth.login') }}">Log in</a></p>
-<p><a href="{{ url_for('entries.index') }}">Continue as guest</a></p>
+        <!-- Header -->
+        <div class="space-y-1 text-center">
+            <div class="text-primary tracking-[0.2em] uppercase font-semibold text-xs">Create account</div>
+            <h1 class="text-4xl font-extrabold tracking-tighter text-on-surface">Sign Up</h1>
+            <p class="text-on-surface/50 text-sm font-light">Start tracking your journey today.</p>
+        </div>
+
+        <!-- Flash messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                <div class="rounded-xl px-4 py-3 text-sm font-medium
+                    {% if category == 'error' %}bg-error/10 text-error border border-error/20
+                    {% else %}bg-primary/10 text-primary border border-primary/20{% endif %}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Card -->
+        <div class="glass-panel p-8 rounded-2xl border border-outline-variant/30 shadow-2xl">
+            <form method="POST" class="space-y-5">
+
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-on-surface/50 mb-2">
+                        Username
+                    </label>
+                    <input autocomplete="username" autofocus name="username" placeholder="your_username" required type="text"
+                           class="w-full bg-surface-container-highest border border-outline-variant rounded-xl text-on-surface placeholder-on-surface/30 focus:ring-2 focus:ring-primary focus:border-transparent transition-all py-3 px-4 outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-on-surface/50 mb-2">
+                        Password
+                    </label>
+                    <input autocomplete="new-password" name="password" placeholder="••••••••" required type="password"
+                           class="w-full bg-surface-container-highest border border-outline-variant rounded-xl text-on-surface placeholder-on-surface/30 focus:ring-2 focus:ring-primary focus:border-transparent transition-all py-3 px-4 outline-none">
+                    <p class="text-xs text-on-surface/30 mt-2">Min. 6 characters, at least one letter and one special character.</p>
+                </div>
+
+                <button type="submit"
+                        class="w-full bg-primary text-on-primary font-bold py-4 rounded-xl hover:brightness-110 active:scale-[0.98] transition-all shadow-[0_0_20px_rgba(71,234,237,0.3)]">
+                    Create Account
+                </button>
+            </form>
+        </div>
+
+        <!-- Footer links -->
+        <div class="flex justify-between text-sm px-1">
+            <span class="text-on-surface/40">Already have an account?
+                <a href="{{ url_for('auth.login') }}" class="text-primary hover:brightness-125 font-semibold transition-all">Log in</a>
+            </span>
+            <a href="{{ url_for('entries.index') }}" class="text-on-surface/40 hover:text-on-surface transition-colors">
+                Continue as guest
+            </a>
+        </div>
+
+    </div>
+</div>
 {% endblock %}
