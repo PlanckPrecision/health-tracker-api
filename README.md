@@ -1,6 +1,6 @@
 # Weightborne
 
-I built this web application because I track my weight daily and couldn't find a tool that was both simple and actually informative. Whether you're losing, gaining, or maintaining weight, having a clear goal and watching your progress toward it matters. Thus I built Weightborne: a minimalist Flask app with real analytics, pace-based forecasting, and a dark UI.
+I've been logging my weight daily for years and couldn't find a tool that balanced simplicity with meaningful analytics, thus I built one myself. Weightborne is a full stack Flask web app with SQLAlchemy backed data persistence, a session auth system, and a Chart.js dashboard that computes pace based forecasting from a rolling weekly average to project your goal date in real time. The goal was a clean, dark-themed UI with no bloat, just the metrics that I want when I am tracking my weight towards a given goal.
 
 ![Dashboard screenshot](app/static/images/landingpage.png)
 
