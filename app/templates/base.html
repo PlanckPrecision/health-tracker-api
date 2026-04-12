@@ -54,14 +54,21 @@
                     <div class="group relative">
                         <button class="flex items-center gap-2 text-on-surface/60 hover:text-primary transition-colors active:scale-95">
                             <div class="h-8 w-8 rounded-full overflow-hidden border border-outline-variant/20">
-                                <img src="{{ url_for('static', filename='images/miku_icon.png') }}" alt="User profile" class="w-full h-full object-cover"/>
+                                <img src="{{ url_for('static', filename='images/pfp.jpg') }}" alt="User profile" class="w-full h-full object-cover"/>
                             </div>
                             <span class="text-sm font-semibold hidden md:block">{{ current_user.username }}</span>
                         </button>
 
-                        <div class="absolute right-0 mt-2 w-48 bg-surface-container border border-outline-variant/20 rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 py-2">
+                        <div class="absolute right-0 mt-2 w-52 bg-surface-container border border-outline-variant/20 rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 py-2">
+                            <a class="flex items-center gap-2 px-4 py-2 text-sm text-on-surface/70 hover:bg-surface-container-highest/50 hover:text-on-surface transition-colors" href="{{ url_for('auth.settings') }}">
+                                <span class="material-symbols-outlined text-base">settings</span>
+                                Settings
+                            </a>
                             <div class="h-[1px] bg-outline-variant/10 my-1 mx-2"></div>
-                            <a class="block px-4 py-2 text-sm text-error hover:bg-error/10 transition-colors" href="{{ url_for('auth.logout') }}">Logout</a>
+                            <a class="flex items-center gap-2 px-4 py-2 text-sm text-error hover:bg-error/10 transition-colors" href="{{ url_for('auth.logout') }}">
+                                <span class="material-symbols-outlined text-base">logout</span>
+                                Logout
+                            </a>
                         </div>
                     </div>
                 {% else %}

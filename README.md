@@ -1,77 +1,97 @@
-# health-tracker-api
-Building a web app that tracks weight. Calculates descriptive measures and trends, allowing the user to track weight in a simple manner. Yet, key measures are displayed. 
+# Weightborne
 
-Also implements forecasting.
+I built this web application because I track my weight daily and couldn't find a tool that was both simple and actually informative. Whether you're losing, gaining, or maintaining weight, having a clear goal and watching your progress toward it matters. Thus I built Weightborne: a minimalist Flask app with real analytics, pace-based forecasting, and a dark UI.
 
-Project Overview
-A Flask web application for tracking weight with features like user authentication, weight entry logging, and analytics including descriptive statistics and trend forecasting.
+![Dashboard screenshot](app/static/images/landingpage.png)
 
-Root Level Files
-File	Purpose
-main.py	Entry point that creates and runs the Flask app with debug mode enabled
+---
 
-README.md	Project description explaining it's a weight tracking app with metrics and forecasting
+## Features
 
-requirements.txt	Lists all Python dependencies (Flask, SQLAlchemy, Flask-Login, etc.)
+- **Daily logging** — enter weight by date with validation (range, decimal precision, duplicate guard)
+- **Dashboard analytics** — Starting weight, 7-day pace, 30-day loss, all-time loss, and dynamic forecast to goal date
+- **Interactive chart** — toggle a forecast overlay projected from your current weekly pace to visualise on what date the goal weight will be achieved, based on current metrics and trends
+- **Goal tracking** — set a target weight; progress bar and estimated time of arrival for goal date update automatically
+- **Auth** — signup, login, change username/password, reset journey (requires password + typed "RESET")
+- **Session security** — `SameSite=Strict`, `HttpOnly` cookies, Werkzeug password hashing
 
-LICENSE	Project license file
+---
 
-App Folder Structure
+## Stack
 
-app/init.py
-Initializes the Flask application
-Sets up SQLAlchemy database (uses in-memory SQLite)
-Configures Flask-Login for user authentication
-Registers blueprints (auth and entries routes)
-Creates all database tables on startup
+| Layer | Technology |
+|---|---|
+| Backend | Python 3.12, Flask, SQLAlchemy |
+| Auth | Flask-Login, Werkzeug |
+| Database | SQLite (dev) via Flask-Migrate |
+| Frontend | Jinja2, Tailwind CSS (CDN), Chart.js v4 |
 
-Sets up the Flask server, database, and authentication system and registers your routes so everything can run.
+---
 
-app/models.py
-Two database models:
+## Quickstart
 
-User: Stores username and hashed password; has relationship to entries
-Entry: Stores weight, date, and user_id (can be null for anonymous entries)
+```bash
+git clone https://github.com/your-username/health-tracker-api.git
+cd health-tracker-api
+python -m venv .venv && source .venv/bin/activate
+pip install -e ".[dev]"
+cp .env.example .env          # add a SECRET_KEY value
+flask db upgrade
+python main.py
+```
 
-Defines the database schema (the structure of what gets stored). It creates the User and Entry classes that represent tables in your database. User input is actually gathered in the routes files.
+Open `http://127.0.0.1:5000`.
 
-app/validate.py
-Validation functions:
+---
 
-check_weight() - Validates weight input (0-500 range, max 2 decimals, accepts comma or period)
-check_date() - Validates date format (DD.MM.YYYY), defaults to today
-is_valid_password() - Ensures password is 6+ chars with letters and special characters
+## Project Structure
 
-Contains your validation helper functions that check if user input (weight, date, password) meets your requirements before it's saved.
+```
+health-tracker-api/
+├── app/
+│   ├── __init__.py       # app factory
+│   ├── models.py         # database models
+│   ├── validate.py       # input validation and stat calculations
+│   ├── routes/
+│   │   ├── auth.py       # authentication routes
+│   │   └── entries.py    # weight entry and dashboard routes
+│   ├── templates/        # Jinja2 HTML templates
+│   └── static/           # JS and images
+├── migrations/           # Alembic migration scripts
+├── tests/
+├── main.py
+└── pyproject.toml
+```
 
-Routes (app/routes/)
+---
 
-auth.py - Authentication endpoints
-/signup - User registration with password validation
-/login - User login with credential verification
-/logout - User logout
-Includes load_user() function for Flask-Login
+## Environment Variables
 
-entries.py - Weight tracking endpoints
-/ - Home page (index) showing today's date
-/register (POST) - Records a new weight entry
-/history - Shows weight history (filtered by logged-in user or anonymous entries)
+Copy `.env.example` to `.env` and fill in:
 
-Templates (app/templates/)
-Template	Purpose
-base.html	Base template extended by other pages
-index.html	Main page to enter weight and view last entry
-login.html	User login form
-signup.html	User registration form
-history.html	Displays weight entry history
+```
+SECRET_KEY=your-secret-key-here
+```
 
-Static Assets (app/static/)
-File	Purpose
-styles.css	Compiled CSS styling
-styles.scss	Source SCSS styling (uncompiled version)
-datepicker.js	JavaScript for date selection
+---
 
-Database
-Uses SQLite (in-memory during development)
-Two tables: users and entries
-User entries are linked by user_id; anonymous entries supported
+## Roadmap
+
+- [ ] Pytest suite for auth and validation
+- [ ] GitHub Actions CI (lint + test on push)
+- [ ] PostgreSQL support for production deployment
+- [ ] Export entries as CSV
+
+---
+
+## Screenshots
+
+| Dashboard (forecast active) | History |
+|---|---|
+| ![Dashboard](app/static/images/landingpage.png) | ![History](app/static/images/history_page.png) |
+
+---
+
+## Demo
+
+

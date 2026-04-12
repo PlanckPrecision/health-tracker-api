@@ -83,11 +83,20 @@ def register():
 @entries_bp.route("/history")
 def history():
     if current_user.is_authenticated:
-        entries = Entry.query.filter_by(user_id=current_user.id).order_by(Entry.date).all()
+        raw = Entry.query.filter_by(user_id=current_user.id).order_by(Entry.date.desc()).all()
     else:
-        entries = Entry.query.filter_by(user_id=None).order_by(Entry.date).all()
+        raw = Entry.query.filter_by(user_id=None).order_by(Entry.date.desc()).all()
 
-    return render_template("history.html", entries=entries)
+    # Pre-compute delta vs the chronologically previous entry (next item in DESC list)
+    entries = []
+    for i, entry in enumerate(raw):
+        if i < len(raw) - 1:
+            delta = round(entry.weight - raw[i + 1].weight, 2)
+        else:
+            delta = None
+        entries.append({"entry": entry, "delta": delta})
+
+    return render_template("history.html", entries=entries, total=len(raw))
 
 
 @entries_bp.route("/api/entries")

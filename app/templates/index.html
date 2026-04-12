@@ -4,14 +4,14 @@
 <!-- Hero / Header Section -->
 <header class="space-y-2">
 <div class="label-sm text-primary tracking-[0.2em] uppercase font-semibold text-xs">Overview</div>
-<h1 class="text-4xl md:text-5xl font-extrabold tracking-tighter text-on-surface">Welcome back {{ user }} ,</h1>
+<h1 class="text-4xl md:text-5xl font-extrabold tracking-tighter text-on-surface">Welcome back {{ user or '' }} ,</h1>
 <p class="text-secondary max-w-xl text-lg font-light leading-relaxed">
   {% if stats.weight_change_from_start is not none %}
     {% if stats.weight_change_from_start < 0 %}
-      Your journey towards enlightenment continues. Total weight lost:
+      Total weight lost since starting your journey is
       <span class="text-primary font-semibold">{{ "%.2f"|format(stats.weight_change_from_start|abs) }} kg</span>.
     {% elif stats.weight_change_from_start > 0 %}
-      Your journey towards enlightenment continues. Total weight gained:
+      Your total weight gained since starting your journey is
       <span class="text-error font-semibold">+{{ "%.2f"|format(stats.weight_change_from_start) }} kg</span>
       from your starting weight.
     {% else %}
@@ -61,12 +61,19 @@
         <div class="lg:col-span-2">
             <div class="glass-panel p-6 rounded-2xl border border-outline-variant/30 shadow-2xl h-full">
                 <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-xl font-bold text-white tracking-tight">Weight Progress Chart</h2>
-                    <span class="text-xs font-medium px-3 py-1 rounded-full bg-cyan-400/10 text-cyan-400 border border-cyan-400/20">Active Trends</span>
+                    <h2 class="text-xl font-bold text-white tracking-tight">Weight Progress</h2>
+                    <button id="forecast-toggle"
+                        aria-pressed="false"
+                        class="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full border border-outline-variant/30 text-slate-500 hover:border-primary/50 hover:text-primary transition-all">
+                        <span class="material-symbols-outlined" style="font-size:14px;">show_chart</span>
+                        Forecast
+                    </button>
                 </div>
 
                 <div class="relative h-[300px] w-full">
-                    <canvas id="weightChart"></canvas>
+                    <canvas id="weightChart"
+                        data-goal="{{ stats.goal_weight or '' }}"
+                        data-weekly-pace="{{ stats.weekly_pace if stats.weekly_pace is not none else '' }}"></canvas>
                 </div>
             </div>
         </div>
@@ -104,8 +111,8 @@
   </div>
 
   <!-- 3. 7-Day Average -->
-  <div class="glass-panel p-6 rounded-2xl border border-outline-variant/30 shadow-2xl">
-    <div class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">7-Day Avg</div>
+  <div class="glass-panel p-6 rounded-2xl border border-outline-variant/30 border-l-4 border-l-outline-variant/40 shadow-2xl">
+    <div class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">7-Day Avg Weight</div>
     <div class="text-3xl font-extrabold text-on-surface">
       {% if stats.seven_day_avg %}
         {{ "%.2f"|format(stats.seven_day_avg) }}<span class="text-sm font-normal text-slate-500 ml-1">kg</span>
@@ -113,9 +120,62 @@
         <span class="text-slate-500 text-xl">N/A</span>
       {% endif %}
     </div>
-    <div class="flex items-center text-xs text-primary mt-2">
+    <div class="flex items-center text-xs mt-2 text-slate-500">
       <span class="material-symbols-outlined text-sm">avg_pace</span>
-      <span class="ml-1">Rolling 7-day window</span>
+      <span class="ml-1">Rolling average of your past 7 days</span>
+    </div>
+  </div>
+
+</div>
+
+    <!-- widget 3: weight loss summaries -->
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-6 bg-surface-container-low p-4 rounded-2xl">
+
+  <!-- 1. Lost in Last 7 Days -->
+  <div class="glass-panel p-6 rounded-2xl border border-outline-variant/30 border-l-4 border-l-primary shadow-2xl">
+    <div class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Lost This Week</div>
+    <div class="text-3xl font-extrabold text-on-surface">
+      {% if stats.lost_7_days is not none %}
+        {{ "%.2f"|format(stats.lost_7_days|abs) }}<span class="text-sm font-normal text-slate-500 ml-1">kg</span>
+      {% else %}
+        <span class="text-slate-500 text-xl">&mdash;</span>
+      {% endif %}
+    </div>
+    <div class="flex items-center text-xs mt-2 text-slate-500">
+      <span class="material-symbols-outlined text-sm">{% if stats.lost_7_days is not none and stats.lost_7_days > 0 %}trending_down{% elif stats.lost_7_days is not none and stats.lost_7_days < 0 %}trending_up{% else %}remove{% endif %}</span>
+      <span class="ml-1">{% if stats.lost_7_days is not none and stats.lost_7_days > 0 %}Lost in the past 7 days{% elif stats.lost_7_days is not none and stats.lost_7_days < 0 %}Gained in the past 7 days{% else %}Not enough data{% endif %}</span>
+    </div>
+  </div>
+
+  <!-- 2. Lost in Last 30 Days -->
+  <div class="glass-panel p-6 rounded-2xl border border-outline-variant/30 border-l-4 border-l-outline-variant/40 shadow-2xl">
+    <div class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Lost This Month</div>
+    <div class="text-3xl font-extrabold text-on-surface">
+      {% if stats.lost_30_days is not none %}
+        {{ "%.2f"|format(stats.lost_30_days|abs) }}<span class="text-sm font-normal text-slate-500 ml-1">kg</span>
+      {% else %}
+        <span class="text-slate-500 text-xl">&mdash;</span>
+      {% endif %}
+    </div>
+    <div class="flex items-center text-xs mt-2 text-slate-500">
+      <span class="material-symbols-outlined text-sm">{% if stats.lost_30_days is not none and stats.lost_30_days > 0 %}trending_down{% elif stats.lost_30_days is not none and stats.lost_30_days < 0 %}trending_up{% else %}remove{% endif %}</span>
+      <span class="ml-1">{% if stats.lost_30_days is not none and stats.lost_30_days > 0 %}Lost in the past 30 days{% elif stats.lost_30_days is not none and stats.lost_30_days < 0 %}Gained in the past 30 days{% else %}Not enough data{% endif %}</span>
+    </div>
+  </div>
+
+  <!-- 3. All-Time Loss -->
+  <div class="glass-panel p-6 rounded-2xl border border-outline-variant/30 border-l-4 border-l-outline-variant/40 shadow-2xl">
+    <div class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">All-Time Loss</div>
+    <div class="text-3xl font-extrabold text-on-surface">
+      {% if stats.lost_all_time is not none %}
+        {{ "%.2f"|format(stats.lost_all_time|abs) }}<span class="text-sm font-normal text-slate-500 ml-1">kg</span>
+      {% else %}
+        <span class="text-slate-500 text-xl">&mdash;</span>
+      {% endif %}
+    </div>
+    <div class="flex items-center text-xs mt-2 text-slate-500">
+      <span class="material-symbols-outlined text-sm">{% if stats.lost_all_time is not none and stats.lost_all_time > 0 %}moving{% elif stats.lost_all_time is not none and stats.lost_all_time < 0 %}trending_up{% else %}remove{% endif %}</span>
+      <span class="ml-1">{% if stats.lost_all_time is not none and stats.lost_all_time > 0 %}Lost since starting weight{% elif stats.lost_all_time is not none and stats.lost_all_time < 0 %}Gained since starting weight{% else %}Not enough data{% endif %}</span>
     </div>
   </div>
 
@@ -128,23 +188,54 @@
     <div class="absolute inset-0 bg-gradient-to-t from-surface to-transparent opacity-60"></div>
     <div class="absolute bottom-6 left-6 right-6">
     <div class="bg-surface-container-high/60 backdrop-blur-md p-4 rounded-lg">
-    <p class="text-sm font-medium italic text-on-surface">"The body is a vessel for the light we cultivate within."</p>
+    <p class="text-sm font-medium italic text-on-surface">"The hardest part is starting."</p>
     </div>
     </div>
     </div>
     <div class="space-y-6">
     <h3 class="text-3xl font-bold tracking-tight text-on-surface">Intelligent Forecasting</h3>
-    <p class="text-secondary leading-relaxed">Based on your last 14 days of entry, our model predicts you will reach your target weight of <span class="text-primary font-bold">76.0kg</span> by December 12th. Maintain your current activity level to stay on track.</p>
-    <div class="flex items-center gap-4">
-    <div class="h-1 w-full bg-surface-container-high rounded-full overflow-hidden">
-    <div class="h-full bg-primary" style="width: 65%"></div>
-    </div>
-    <span class="text-xs font-bold text-primary whitespace-nowrap">65% TO GOAL</span>
-    </div>
-    <button class="text-primary text-sm font-bold uppercase tracking-widest flex items-center gap-2 hover:gap-4 transition-all">
-                        View Detailed Analytics <span class="material-symbols-outlined">arrow_forward</span>
-    </button>
-    </div>
+
+    {% if stats.goal_weight is not none and stats.forecast_date is not none %}
+      <p class="text-secondary leading-relaxed">
+        At your current pace of
+        <span class="text-primary font-bold">{{ stats.weekly_pace_label }}</span>,
+        you'll reach your goal of
+        <span class="text-primary font-bold">{{ "%.1f"|format(stats.goal_weight) }} kg</span>
+        in approximately <span class="text-on-surface font-semibold">{{ stats.forecast_weeks }} weeks</span>
+        — by <span class="text-primary font-bold">{{ stats.forecast_date.strftime("%B %d, %Y") }}</span>.
+      </p>
+    {% elif stats.goal_weight is not none and stats.weekly_pace is not none and stats.weekly_pace >= 0 %}
+      <p class="text-secondary leading-relaxed">
+        Your current pace shows a weekly gain of
+        <span class="text-error font-bold">{{ stats.weekly_pace_label }}</span>.
+        Reverse the trend to unlock a goal forecast.
+      </p>
+    {% elif stats.goal_weight is none %}
+      <p class="text-secondary leading-relaxed">
+        No goal set yet. Head to
+        <a href="/goals" class="text-primary font-semibold hover:underline">Goals</a>
+        to set a target weight and unlock forecasting.
+      </p>
+    {% else %}
+      <p class="text-secondary leading-relaxed">
+        Not enough data to forecast yet. Keep logging daily and your projection will appear here.
+      </p>
+    {% endif %}
+
+    <div class="space-y-2">
+      <div class="flex items-center gap-4">
+        <div class="h-1 w-full bg-surface-container-high rounded-full overflow-hidden">
+          <div class="h-full bg-primary transition-all duration-700" style="width: {{ stats.goal_progress_pct }}%;"></div>
+        </div>
+        <span class="text-xs font-bold text-primary whitespace-nowrap">{{ stats.goal_progress_pct }}% TO GOAL</span>
+      </div>
+      {% if stats.goal_weight is not none %}
+      <div class="flex justify-between text-xs text-slate-500">
+        <span>{{ "%.1f"|format(stats.starting_weight) }} kg</span>
+        <span>Goal: {{ "%.1f"|format(stats.goal_weight) }} kg</span>
+      </div>
+      {% endif %}
+
     </div>
     </main>
 
@@ -158,7 +249,7 @@
     <a class="font-manrope text-xs uppercase tracking-widest text-slate-500 hover:text-cyan-400 transition-colors opacity-80 hover:opacity-100" href="#">Support</a>
     </div>
     <div class="font-manrope text-xs uppercase tracking-widest text-slate-500">
-                    © 2026 Weighborne All rights reserved.
+                    © 2026 Weightborne All rights reserved.
                 </div>
     </div>
     </footer>

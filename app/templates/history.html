@@ -2,27 +2,121 @@
 
 {% block body %}
 
-    <h1>Weight History</h1>
-    <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Username</th>
-                <th>Weight</th>
-                <th>Date</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for entry in entries %}
-                <tr>
-                    <td>{{ entry.id }}</td>
-                    <td>{{ entry.user.username if entry.user else "Anonymous" }}</td>
-                    <td>{{ entry.weight }}</td>
-                    <td>{{ entry.date }}</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+<!-- Page Header -->
+<header class="space-y-2">
+    <div class="text-primary tracking-[0.2em] uppercase font-semibold text-xs">Log</div>
+    <h1 class="text-4xl md:text-5xl font-extrabold tracking-tighter text-on-surface">Weight History</h1>
+    <p class="text-secondary text-lg font-light leading-relaxed">
+        {% if total > 0 %}
+            {{ total }} entr{{ "y" if total == 1 else "ies" }} recorded. Latest on top.
+        {% else %}
+            No entries yet. Head to the dashboard to log your first weight.
+        {% endif %}
+    </p>
+</header>
 
+{% if entries %}
+
+<!-- Summary bar -->
+<div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+    <div class="glass-panel p-4 rounded-2xl border border-outline-variant/30">
+        <div class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Total Entries</div>
+        <div class="text-2xl font-extrabold text-on-surface">{{ total }}</div>
+    </div>
+    <div class="glass-panel p-4 rounded-2xl border border-outline-variant/30">
+        <div class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Latest</div>
+        <div class="text-2xl font-extrabold text-on-surface">{{ "%.2f"|format(entries[0].entry.weight) }} <span class="text-sm font-normal text-slate-500">kg</span></div>
+    </div>
+    <div class="glass-panel p-4 rounded-2xl border border-outline-variant/30">
+        <div class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">First Entry</div>
+        <div class="text-2xl font-extrabold text-on-surface">{{ "%.2f"|format(entries[-1].entry.weight) }} <span class="text-sm font-normal text-slate-500">kg</span></div>
+    </div>
+    <div class="glass-panel p-4 rounded-2xl border border-outline-variant/30">
+        <div class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Total Change</div>
+        {% set total_change = entries[0].entry.weight - entries[-1].entry.weight %}
+        <div class="text-2xl font-extrabold {% if total_change < 0 %}text-green-400{% elif total_change > 0 %}text-error{% else %}text-on-surface{% endif %}">
+            {{ "%+.2f"|format(total_change) }} <span class="text-sm font-normal text-slate-500">kg</span>
+        </div>
+    </div>
+</div>
+
+<!-- Entry list -->
+<div class="glass-panel rounded-2xl border border-outline-variant/30 shadow-2xl overflow-hidden">
+
+    <!-- Table header -->
+    <div class="grid grid-cols-12 px-6 py-3 border-b border-outline-variant/20 bg-surface-container">
+        <div class="col-span-1 text-xs font-bold text-slate-500 uppercase tracking-widest">#</div>
+        <div class="col-span-5 text-xs font-bold text-slate-500 uppercase tracking-widest">Date</div>
+        <div class="col-span-3 text-xs font-bold text-slate-500 uppercase tracking-widest">Weight</div>
+        <div class="col-span-3 text-xs font-bold text-slate-500 uppercase tracking-widest text-right">Change</div>
+    </div>
+
+    <!-- Rows -->
+    {% for item in entries %}
+    <div class="grid grid-cols-12 items-center px-6 py-4
+        {% if not loop.last %}border-b border-outline-variant/10{% endif %}
+        {% if loop.first %}bg-surface-container/40{% endif %}
+        hover:bg-surface-container/60 transition-colors group">
+
+        <!-- Row number (1 = latest) -->
+        <div class="col-span-1 text-xs text-slate-600 font-mono tabular-nums">{{ loop.index }}</div>
+
+        <!-- Date -->
+        <div class="col-span-5">
+            <div class="text-sm font-semibold text-on-surface">
+                {{ item.entry.date.strftime("%b %d, %Y") }}
+            </div>
+            <div class="text-xs text-slate-500">
+                {{ item.entry.date.strftime("%A") }}
+            </div>
+        </div>
+
+        <!-- Weight -->
+        <div class="col-span-3">
+            <span class="text-lg font-extrabold {% if loop.first %}text-primary{% else %}text-on-surface{% endif %}">
+                {{ "%.2f"|format(item.entry.weight) }}
+            </span>
+            <span class="text-xs text-slate-500 ml-0.5">kg</span>
+        </div>
+
+        <!-- Delta badge -->
+        <div class="col-span-3 flex justify-end">
+            {% if item.delta is not none %}
+                <span class="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full
+                    {% if item.delta < 0 %}
+                        bg-green-400/10 text-green-400
+                    {% elif item.delta > 0 %}
+                        bg-error/10 text-error
+                    {% else %}
+                        bg-outline-variant/20 text-slate-500
+                    {% endif %}">
+                    <span class="material-symbols-outlined text-xs" style="font-size:13px;">
+                        {% if item.delta < 0 %}arrow_downward{% elif item.delta > 0 %}arrow_upward{% else %}remove{% endif %}
+                    </span>
+                    {{ "%+.2f"|format(item.delta) }} kg
+                </span>
+            {% else %}
+                <span class="text-xs text-slate-600">—</span>
+            {% endif %}
+        </div>
+
+    </div>
+    {% endfor %}
+
+</div>
+
+{% else %}
+
+<!-- Empty state -->
+<div class="glass-panel rounded-2xl border border-outline-variant/30 p-16 flex flex-col items-center justify-center text-center space-y-4">
+    <span class="material-symbols-outlined text-5xl text-slate-600">monitoring</span>
+    <h2 class="text-xl font-bold text-on-surface">No entries yet</h2>
+    <p class="text-secondary text-sm max-w-xs">Start logging your weight on the dashboard and your full history will appear here.</p>
+    <a href="/" class="mt-2 text-primary text-sm font-bold uppercase tracking-widest flex items-center gap-2 hover:gap-4 transition-all">
+        Go to Dashboard <span class="material-symbols-outlined text-sm">arrow_forward</span>
+    </a>
+</div>
+
+{% endif %}
 
 {% endblock %}
