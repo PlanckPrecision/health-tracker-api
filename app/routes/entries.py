@@ -34,10 +34,13 @@ def register():
             datetime.strptime(date_raw, "%d.%m.%Y")
         except ValueError:
             today = datetime.now().strftime("%d.%m.%Y")
+            user_id = current_user.id if current_user.is_authenticated else None
             return render_template(
                 "index.html",
                 message=f"Invalid date format: '{date_raw}'. Use DD.MM.YYYY",
                 today=today,
+                user=current_user.username if current_user.is_authenticated else None,
+                stats=get_dashboard_stats(user_id),
             )
 
     # Convert to real date object (IMPORTANT!)
@@ -47,7 +50,14 @@ def register():
     is_valid, result = check_weight(weight_raw)
     if not is_valid:
         today = datetime.now().strftime("%d.%m.%Y")
-        return render_template("index.html", message=result, today=today)
+        user_id = current_user.id if current_user.is_authenticated else None
+        return render_template(
+            "index.html",
+            message=result,
+            today=today,
+            user=current_user.username if current_user.is_authenticated else None,
+            stats=get_dashboard_stats(user_id),
+        )
 
     user_id = current_user.id if current_user.is_authenticated else None
 
