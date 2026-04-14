@@ -9,7 +9,7 @@
 ## 2. Project Stack & Environment
 * **Backend:** Python (assume 3.12+), Flask, SQLAlchemy.
 * **Frontend:** HTML5, JavaScript (ES6+), Tailwind CSS.
-* *(Add future tools/frameworks here as the project expands)*
+
 
 ## 3. General Code Formatting & Rules
 * **Indentation:** Use exactly four spaces for each level of indentation. Never use tabs.

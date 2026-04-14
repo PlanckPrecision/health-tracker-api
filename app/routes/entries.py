@@ -1,8 +1,8 @@
 from flask import Blueprint, render_template, request, jsonify, session
-from flask_login import current_user
-from datetime import datetime
+from flask_login import current_user, login_required
+from datetime import datetime, date
 from app import db
-from app.models import Entry, Goal
+from app.models import Entry, Goal, Measurement
 from app.validate import check_weight, get_dashboard_stats
 
 entries_bp = Blueprint("entries", __name__)
@@ -170,3 +170,56 @@ def goals():
         goal_weight=goal_result,
         start_weight=start_result,
     )
+
+
+@entries_bp.route("/measurements", methods=["GET", "POST"])
+@login_required
+def measurements():
+    if request.method == "POST":
+        date_raw = request.form.get("date", "").strip()
+        try:
+            entry_date = datetime.strptime(date_raw, "%d.%m.%Y").date() if date_raw else date.today()
+        except ValueError:
+            entry_date = date.today()
+
+        def parse_cm(field):
+            val = request.form.get(field, "").strip().replace(",", ".")
+            try:
+                v = float(val)
+                return v if 0 < v < 500 else None
+            except ValueError:
+                return None
+
+        waist    = parse_cm("waist")
+        hips     = parse_cm("hips")
+        chest    = parse_cm("chest")
+        neck     = parse_cm("neck")
+        body_fat = parse_cm("body_fat")
+
+        existing = Measurement.query.filter_by(user_id=current_user.id, date=entry_date).first()
+        if existing:
+            existing.waist    = waist
+            existing.hips     = hips
+            existing.chest    = chest
+            existing.neck     = neck
+            existing.body_fat = body_fat
+        else:
+            db.session.add(Measurement(
+                user_id=current_user.id,
+                date=entry_date,
+                waist=waist,
+                hips=hips,
+                chest=chest,
+                neck=neck,
+                body_fat=body_fat,
+            ))
+        db.session.commit()
+
+    records = (
+        Measurement.query
+        .filter_by(user_id=current_user.id)
+        .order_by(Measurement.date.desc())
+        .all()
+    )
+    today = date.today().strftime("%d.%m.%Y")
+    return render_template("measurements.html", records=records, today=today)

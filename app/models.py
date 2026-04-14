@@ -10,9 +10,8 @@ class User(UserMixin, db.Model):
     password = db.Column(db.String(120), nullable=False)
 
     entries = db.relationship("Entry", backref="user", lazy=True, cascade="all, delete-orphan")
-
-    # One goal per user
     goal = db.relationship("Goal", backref="user", uselist=False, cascade="all, delete-orphan")
+    measurements = db.relationship("Measurement", backref="user", lazy=True, cascade="all, delete-orphan")
 
     def set_password(self, password):
         self.password = generate_password_hash(password)
@@ -45,4 +44,15 @@ class DimDate(db.Model):
     month = db.Column(db.Integer, nullable=False)
     year = db.Column(db.Integer, nullable=False)
 
-# TODO: Add goal weight to user model and create a relationship to Goal model. This will allow us to easily access the user's goal weight when calculating the 7-day average and displaying it on the dashboard.
+
+class Measurement(db.Model):
+    __tablename__ = "measurements"
+
+    id = db.Column(db.Integer, primary_key=True)
+    date = db.Column(db.Date, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    waist = db.Column(db.Float, nullable=True)
+    hips = db.Column(db.Float, nullable=True)
+    chest = db.Column(db.Float, nullable=True)
+    neck = db.Column(db.Float, nullable=True)
+    body_fat = db.Column(db.Float, nullable=True)

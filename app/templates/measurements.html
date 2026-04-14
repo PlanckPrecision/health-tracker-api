@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block body %}
+
+<header class="space-y-2">
+    <div class="text-primary tracking-[0.2em] uppercase font-semibold text-xs">Body Composition</div>
+    <h1 class="text-4xl md:text-5xl font-extrabold tracking-tighter text-on-surface">Measurements</h1>
+    <p class="text-on-surface/50 text-lg font-light leading-relaxed">
+        Track waist, hips, chest, neck, and body fat over time. All values in cm / %.
+    </p>
+</header>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+    <!-- Log Form -->
+    <div class="lg:col-span-1">
+        <div class="glass-panel p-6 rounded-2xl border border-outline-variant/30 shadow-2xl space-y-6">
+            <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary">straighten</span>
+                Log Measurements
+            </h2>
+
+            <form action="/measurements" method="post" class="space-y-4">
+
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Date</label>
+                    <input id="date-input" name="date" type="text" value="{{ today }}" readonly
+                           class="w-full bg-surface-container-highest/50 border-outline-variant rounded-xl text-slate-400 py-3 px-4 cursor-not-allowed">
+                </div>
+
+                {% set fields = [
+                    ("waist",    "Waist",    "cm"),
+                    ("hips",     "Hips",     "cm"),
+                    ("chest",    "Chest",    "cm"),
+                    ("neck",     "Neck",     "cm"),
+                    ("body_fat", "Body Fat", "%")
+                ] %}
+
+                {% for name, label, unit in fields %}
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
+                        {{ label }} <span class="text-slate-500 normal-case font-normal">({{ unit }})</span>
+                    </label>
+                    <input autocomplete="off" name="{{ name }}" placeholder="—" type="text"
+                           class="w-full bg-surface-container-highest border-outline-variant rounded-xl text-white focus:ring-2 focus:ring-cyan-400 focus:border-transparent transition-all py-3 px-4">
+                </div>
+                {% endfor %}
+
+                <button type="submit"
+                        class="w-full bg-primary text-on-primary font-bold py-4 rounded-xl hover:brightness-110 active:scale-[0.98] transition-all shadow-[0_0_20px_rgba(71,234,237,0.3)]">
+                    Save Measurements
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- History Table -->
+    <div class="lg:col-span-2">
+        <div class="glass-panel p-6 rounded-2xl border border-outline-variant/30 shadow-2xl">
+            <h2 class="text-xl font-bold text-white mb-6">History</h2>
+
+            {% if records %}
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="text-left border-b border-outline-variant/20">
+                            <th class="pb-3 text-xs font-bold text-slate-500 uppercase tracking-widest pr-4">Date</th>
+                            <th class="pb-3 text-xs font-bold text-slate-500 uppercase tracking-widest pr-4">Waist</th>
+                            <th class="pb-3 text-xs font-bold text-slate-500 uppercase tracking-widest pr-4">Hips</th>
+                            <th class="pb-3 text-xs font-bold text-slate-500 uppercase tracking-widest pr-4">Chest</th>
+                            <th class="pb-3 text-xs font-bold text-slate-500 uppercase tracking-widest pr-4">Neck</th>
+                            <th class="pb-3 text-xs font-bold text-slate-500 uppercase tracking-widest">Body Fat</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-outline-variant/10">
+                        {% for r in records %}
+                        <tr class="{% if loop.first %}bg-primary/5{% endif %} hover:bg-surface-container-highest/30 transition-colors">
+                            <td class="py-3 pr-4 font-semibold text-on-surface">
+                                {{ r.date.strftime("%b %d, %Y") }}
+                            </td>
+                            <td class="py-3 pr-4 text-slate-300">{{ "%.1f"|format(r.waist) ~ " cm" if r.waist is not none else "—" }}</td>
+                            <td class="py-3 pr-4 text-slate-300">{{ "%.1f"|format(r.hips)  ~ " cm" if r.hips  is not none else "—" }}</td>
+                            <td class="py-3 pr-4 text-slate-300">{{ "%.1f"|format(r.chest) ~ " cm" if r.chest is not none else "—" }}</td>
+                            <td class="py-3 pr-4 text-slate-300">{{ "%.1f"|format(r.neck)  ~ " cm" if r.neck  is not none else "—" }}</td>
+                            <td class="py-3 text-slate-300">{{ "%.1f"|format(r.body_fat) ~ " %" if r.body_fat is not none else "—" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="flex flex-col items-center justify-center py-16 text-slate-500 space-y-2">
+                <span class="material-symbols-outlined text-4xl text-outline-variant/40">straighten</span>
+                <p class="text-sm">No measurements logged yet.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

@@ -14,6 +14,18 @@ const parseDate = str => {
     return new Date(+y, +m - 1, +d);
 };
 
+// Exponential Moving Average — weights recent entries more than older ones.
+// alpha controls responsiveness: 0.2 = smooth, 0.4 = more reactive.
+// This cuts through daily noise (water weight, salt spikes) better than SMA.
+const buildEma = (weights, alpha = 0.3) => {
+    if (weights.length === 0) return [];
+    const ema = [weights[0]];
+    for (let i = 1; i < weights.length; i++) {
+        ema.push(+(alpha * weights[i] + (1 - alpha) * ema[i - 1]).toFixed(2));
+    }
+    return ema;
+};
+
 const formatDate = date => {
     const d = String(date.getDate()).padStart(2, '0');
     const m = String(date.getMonth() + 1).padStart(2, '0');
@@ -71,6 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const dates   = data.map(e => e.date);
             const weights = data.map(e => e.weight);
+            const emaData = buildEma(weights);
 
             const { futureLabels, futureWeights } = buildForecast(dates, weights, weeklyPace, goalWeight);
 
@@ -117,6 +130,19 @@ document.addEventListener('DOMContentLoaded', () => {
                             spanGaps: false,
                         },
                         {
+                            label: 'Trend (EMA)',
+                            data: emaData,
+                            borderColor: 'rgba(71, 234, 237, 0.35)',
+                            backgroundColor: 'transparent',
+                            borderWidth: 2,
+                            borderDash: [4, 3],
+                            pointRadius: 0,
+                            pointHoverRadius: 0,
+                            tension: 0.5,
+                            fill: false,
+                            spanGaps: false,
+                        },
+                        {
                             label: 'Forecast',
                             data: forecastData,
                             borderColor: 'rgba(71, 234, 237, 0.45)',
@@ -158,10 +184,11 @@ document.addEventListener('DOMContentLoaded', () => {
                                 title: items => items[0].label,
                                 label: item => {
                                     if (item.parsed.y === null) return null;
-                                    const suffix = item.datasetIndex === 1 ? ' (forecast)' : '';
+                                    if (item.datasetIndex === 1) return null; // hide EMA from tooltip
+                                    const suffix = item.datasetIndex === 2 ? ' (forecast)' : '';
                                     return `${item.parsed.y} kg${suffix}`;
                                 },
-                                filter: item => item.parsed.y !== null,
+                                filter: item => item.parsed.y !== null && item.datasetIndex !== 1,
                             },
                         },
                     },
@@ -208,7 +235,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (toggleBtn.disabled) return;
 
                     const isActive = toggleBtn.getAttribute('aria-pressed') === 'true';
-                    const forecastDataset = chart.data.datasets[1];
+                    const forecastDataset = chart.data.datasets[2];
 
                     if (!isActive) {
                         // Expand x-axis to include future dates
