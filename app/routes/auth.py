@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_user, logout_user, login_required, current_user
 from app import db, login_manager
-from app.models import User, Entry, Goal
+from app.models import User, Entry, Goal, Measurement
 from app.validate import is_valid_password
 
 auth_bp = Blueprint("auth", __name__)
@@ -149,11 +149,12 @@ def reset_journey():
         return redirect(url_for("auth.settings"))
 
     Entry.query.filter_by(user_id=current_user.id).delete()
+    Measurement.query.filter_by(user_id=current_user.id).delete()
     if current_user.goal:
         db.session.delete(current_user.goal)
     db.session.commit()
 
-    flash("Your journey has been reset. All entries and your goal have been deleted.", "success")
+    flash("Your journey has been reset. All entries, measurements, and your goal have been deleted.", "success")
     return redirect(url_for("entries.index"))
 
 

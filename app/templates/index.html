@@ -4,7 +4,18 @@
 <!-- Hero / Header Section -->
 <header class="space-y-2">
 <div class="label-sm text-primary tracking-[0.2em] uppercase font-semibold text-xs">Overview</div>
-<h1 class="text-4xl md:text-5xl font-extrabold tracking-tighter text-on-surface">Welcome back {{ user or '' }} ,</h1>
+<div class="flex items-center justify-between gap-4">
+  <h1 class="text-4xl md:text-5xl font-extrabold tracking-tighter text-on-surface">Welcome back {{ user or '' }} ,</h1>
+  {% if stats.streak > 0 %}
+  <div class="flex-shrink-0 flex items-center gap-2 glass-panel border border-outline-variant/30 rounded-2xl px-4 py-2 shadow-lg">
+    <span class="material-symbols-outlined text-primary text-2xl leading-none">local_fire_department</span>
+    <div class="text-right">
+      <div class="text-xl font-extrabold text-on-surface leading-none">{{ stats.streak }}</div>
+      <div class="text-[10px] font-semibold uppercase tracking-widest text-slate-500 leading-none mt-0.5">day streak</div>
+    </div>
+  </div>
+  {% endif %}
+</div>
 <p class="text-secondary max-w-xl text-lg font-light leading-relaxed">
   {% if stats.weight_change_from_start is not none %}
     {% if stats.weight_change_from_start < 0 %}
@@ -61,7 +72,15 @@
         <div class="lg:col-span-2">
             <div class="glass-panel p-6 rounded-2xl border border-outline-variant/30 shadow-2xl h-full">
                 <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-xl font-bold text-white tracking-tight">Weight Progress</h2>
+                    <div class="flex items-center gap-4">
+                        <h2 class="text-xl font-bold text-white tracking-tight">Weight Progress</h2>
+                        <div class="flex items-center gap-1.5">
+                            <svg width="20" height="10" class="flex-shrink-0">
+                                <line x1="0" y1="5" x2="20" y2="5" stroke="rgba(71,234,237,0.4)" stroke-width="2" stroke-dasharray="4 3"/>
+                            </svg>
+                            <span class="text-[10px] font-semibold uppercase tracking-widest text-slate-500">Trend</span>
+                        </div>
+                    </div>
                     <button id="forecast-toggle"
                         aria-pressed="false"
                         class="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full border border-outline-variant/30 text-slate-500 hover:border-primary/50 hover:text-primary transition-all">

@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date as date_type
 import re
 from app.models import Entry, Goal
 
@@ -83,9 +83,25 @@ def get_seven_day_average(user_id, end_date):
     return rounded_average
 
 
-def get_dashboard_stats(user_id):
-    from datetime import date as date_type
+def get_streak(user_id):
+    if user_id is None:
+        return 0
+    entries = Entry.query.filter_by(user_id=user_id).order_by(Entry.date.desc()).all()
+    if not entries:
+        return 0
 
+    entry_dates = {e.date for e in entries}
+    today = date_type.today()
+    check = today if today in entry_dates else today - timedelta(days=1)
+
+    streak = 0
+    while check in entry_dates:
+        streak += 1
+        check -= timedelta(days=1)
+    return streak
+
+
+def get_dashboard_stats(user_id):
     today = date_type.today()
 
     # Anchor all date-window calculations to the most recent entry's actual date,
@@ -215,4 +231,5 @@ def get_dashboard_stats(user_id):
         "forecast_date": forecast_date,
         "forecast_weeks": forecast_weeks,
         "goal_progress_pct": goal_progress_pct,
+        "streak": get_streak(user_id),
     }
