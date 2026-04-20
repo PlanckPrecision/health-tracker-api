@@ -30,6 +30,7 @@
             <p class="text-xs text-on-surface/40">Your current username is <span class="text-primary font-semibold">{{ current_user.username }}</span>.</p>
         </div>
         <form method="POST" action="{{ url_for('auth.change_username') }}" class="space-y-4">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div>
                 <label class="block text-xs font-semibold uppercase tracking-wider text-on-surface/50 mb-2">New Username</label>
                 <input name="new_username" type="text" required autocomplete="username"
@@ -56,6 +57,7 @@
             <p class="text-xs text-on-surface/40">Min. 6 characters, at least one letter and one special character.</p>
         </div>
         <form method="POST" action="{{ url_for('auth.change_password') }}" class="space-y-4">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div>
                 <label class="block text-xs font-semibold uppercase tracking-wider text-on-surface/50 mb-2">Current Password</label>
                 <input name="current_password" type="password" required autocomplete="current-password"
@@ -96,6 +98,7 @@
         <!-- Confirmation form, hidden by default -->
         <form id="reset-form" method="POST" action="{{ url_for('auth.reset_journey') }}"
               class="hidden space-y-4 pt-2 border-t border-error/20">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <p class="text-xs text-error font-semibold uppercase tracking-wider">Confirm reset</p>
             <div>
                 <label class="block text-xs font-semibold uppercase tracking-wider text-on-surface/50 mb-2">

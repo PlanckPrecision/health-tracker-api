@@ -46,9 +46,10 @@
     <!-- Table header -->
     <div class="grid grid-cols-12 px-6 py-3 border-b border-outline-variant/20 bg-surface-container">
         <div class="col-span-1 text-xs font-bold text-slate-500 uppercase tracking-widest">#</div>
-        <div class="col-span-5 text-xs font-bold text-slate-500 uppercase tracking-widest">Date</div>
+        <div class="col-span-4 text-xs font-bold text-slate-500 uppercase tracking-widest">Date</div>
         <div class="col-span-3 text-xs font-bold text-slate-500 uppercase tracking-widest">Weight</div>
         <div class="col-span-3 text-xs font-bold text-slate-500 uppercase tracking-widest text-right">Change</div>
+        <div class="col-span-1"></div>
     </div>
 
     <!-- Rows -->
@@ -62,7 +63,7 @@
         <div class="col-span-1 text-xs text-slate-600 font-mono tabular-nums">{{ loop.index }}</div>
 
         <!-- Date -->
-        <div class="col-span-5">
+        <div class="col-span-4">
             <div class="text-sm font-semibold text-on-surface">
                 {{ item.entry.date.strftime("%b %d, %Y") }}
             </div>
@@ -98,6 +99,19 @@
             {% else %}
                 <span class="text-xs text-slate-600">—</span>
             {% endif %}
+        </div>
+
+        <!-- Delete -->
+        <div class="col-span-1 flex justify-end">
+            <form method="POST" action="/entries/{{ item.entry.id }}/delete"
+                  onsubmit="return confirm('Delete this entry?')">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit"
+                        class="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-lg hover:bg-error/10 text-slate-600 hover:text-error"
+                        title="Delete entry">
+                    <span class="material-symbols-outlined" style="font-size:16px;">delete</span>
+                </button>
+            </form>
         </div>
 
     </div>

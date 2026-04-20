@@ -1,6 +1,10 @@
-from datetime import datetime, timedelta, date as date_type
+import math
 import re
+from datetime import date as date_type
+from datetime import datetime, timedelta
+
 from app.models import Entry, Goal
+
 
 def check_weight(weight_str):
     """
@@ -35,17 +39,6 @@ def check_weight(weight_str):
 
     return True, val
 
-def check_date(date_raw):
-    date_raw = (date_raw or "").strip()
-
-    if not date_raw:
-        return True, datetime.today().date()
-
-    try:
-        date_obj = datetime.strptime(date_raw, "%Y-%m-%d").date()
-        return True, date_obj
-    except ValueError:
-        return False, "Invalid date format. Use YYYY-MM-DD"
 
 def is_valid_password(password):
     """
@@ -217,10 +210,31 @@ def get_dashboard_stats(user_id):
         done = starting_weight - latest_entry.weight
         goal_progress_pct = max(0, min(100, round((done / total) * 100, 1)))
 
+    # Committed-rate forecast: uses compound loss formula.
+    # Each week the user loses `weekly_loss_pct`% of their current weight.
+    # weeks = ln(goal_weight / current_weight) / ln(1 - rate)
+    committed_forecast_date = None
+    committed_forecast_weeks = None
+    committed_kg_per_week = None
+
+    if (
+        latest_entry is not None
+        and goal_weight is not None
+        and goal is not None
+        and goal.weekly_loss_pct is not None
+        and latest_entry.weight > goal_weight
+    ):
+        rate = goal.weekly_loss_pct / 100.0
+        committed_kg_per_week = round(latest_entry.weight * rate, 3)
+        weeks_needed = math.log(goal_weight / latest_entry.weight) / math.log(1 - rate)
+        committed_forecast_weeks = round(weeks_needed, 1)
+        committed_forecast_date = reference_date + timedelta(days=round(weeks_needed * 7))
+
     return {
         "seven_day_avg": seven_day_avg,
         "starting_weight": starting_weight,
         "goal_weight": goal_weight,
+        "weekly_loss_pct": goal.weekly_loss_pct if goal else None,
         "weekly_pace": weekly_pace,
         "weekly_pace_label": weekly_pace_label,
         "weekly_trend": weekly_trend,
@@ -230,6 +244,9 @@ def get_dashboard_stats(user_id):
         "lost_all_time": lost_all_time,
         "forecast_date": forecast_date,
         "forecast_weeks": forecast_weeks,
+        "committed_forecast_date": committed_forecast_date,
+        "committed_forecast_weeks": committed_forecast_weeks,
+        "committed_kg_per_week": committed_kg_per_week,
         "goal_progress_pct": goal_progress_pct,
         "streak": get_streak(user_id),
     }

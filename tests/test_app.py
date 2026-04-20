@@ -1,51 +1,6 @@
-import os
-import pytest
-
-os.environ.setdefault("SECRET_KEY", "test-secret-key-not-for-prod")
-
-from app import create_app, db
-from app.models import User
-
-
-# ---------------------------------------------------------------------------
-# Fixtures
-# ---------------------------------------------------------------------------
-
-@pytest.fixture
-def app():
-    application = create_app()
-    application.config.update(
-        TESTING=True,
-        SQLALCHEMY_DATABASE_URI="sqlite:///:memory:",
-        WTF_CSRF_ENABLED=False,
-        DEBUG=False,
-    )
-    with application.app_context():
-        db.create_all()
-        yield application
-        db.drop_all()
-
-
-@pytest.fixture
-def client(app):
-    return app.test_client()
-
-
-def _signup(client, username="healthuser", password="Secure1!"):
-    return client.post(
-        "/signup",
-        data={"username": username, "password": password},
-        follow_redirects=True,
-    )
-
-
-def _login(client, username="healthuser", password="Secure1!"):
-    return client.post(
-        "/login",
-        data={"username": username, "password": password},
-        follow_redirects=True,
-    )
-
+from app import db
+from app.models import Entry, User
+from tests.conftest import login, signup
 
 # ---------------------------------------------------------------------------
 # Password validation (pure function — no DB needed)
@@ -101,13 +56,13 @@ class TestWeightValidation:
 
 class TestSignup:
     def test_signup_success(self, client, app):
-        _signup(client)
+        signup(client)
         with app.app_context():
             assert User.query.filter_by(username="healthuser").first() is not None
 
     def test_duplicate_username_blocked(self, client):
-        _signup(client)
-        resp = _signup(client)
+        signup(client)
+        resp = signup(client)
         assert b"already exists" in resp.data
 
     def test_weak_password_blocked(self, client):
@@ -119,7 +74,7 @@ class TestSignup:
         assert b"Password must be" in resp.data
 
     def test_password_not_stored_in_plaintext(self, client, app):
-        _signup(client, password="Secure1!")
+        signup(client, password="Secure1!")
         with app.app_context():
             user = User.query.filter_by(username="healthuser").first()
             assert user.password != "Secure1!"
@@ -127,21 +82,68 @@ class TestSignup:
 
 class TestLogin:
     def test_wrong_password_rejected(self, client):
-        _signup(client)
-        resp = _login(client, password="WrongPass99!")
+        signup(client)
+        resp = login(client, password="WrongPass99!")
         assert b"Invalid" in resp.data
 
     def test_nonexistent_user_rejected(self, client):
-        resp = _login(client, username="ghost")
+        resp = login(client, username="ghost")
         assert b"Invalid" in resp.data
 
     def test_correct_credentials_accepted(self, client):
-        _signup(client)
-        resp = _login(client)
+        signup(client)
+        resp = login(client)
         assert resp.status_code == 200
 
 
 class TestProtectedRoutes:
     def test_settings_redirects_when_not_logged_in(self, client):
         resp = client.get("/settings", follow_redirects=False)
+        assert resp.status_code == 302
+
+
+# ---------------------------------------------------------------------------
+# Entry management
+# ---------------------------------------------------------------------------
+
+class TestDeleteEntry:
+    def test_delete_removes_entry(self, client, app):
+        signup(client)
+        login(client)
+        client.post("/register", data={"weight": "80.0", "date": ""}, follow_redirects=True)
+
+        with app.app_context():
+            entry = Entry.query.first()
+            assert entry is not None
+            entry_id = entry.id
+
+        resp = client.post(f"/entries/{entry_id}/delete", follow_redirects=True)
+        assert resp.status_code == 200
+        with app.app_context():
+            assert db.session.get(Entry, entry_id) is None
+
+    def test_delete_other_users_entry_returns_404(self, client, app):
+        signup(client, username="owner")
+        login(client, username="owner")
+        client.post("/register", data={"weight": "80.0", "date": ""}, follow_redirects=True)
+
+        with app.app_context():
+            entry_id = Entry.query.first().id
+
+        signup(client, username="attacker", password="Attack1!")
+        login(client, username="attacker", password="Attack1!")
+
+        resp = client.post(f"/entries/{entry_id}/delete", follow_redirects=False)
+        assert resp.status_code == 404
+
+    def test_delete_requires_login(self, client, app):
+        signup(client)
+        login(client)
+        client.post("/register", data={"weight": "80.0", "date": ""}, follow_redirects=True)
+
+        with app.app_context():
+            entry_id = Entry.query.first().id
+
+        client.get("/logout")
+        resp = client.post(f"/entries/{entry_id}/delete", follow_redirects=False)
         assert resp.status_code == 302

@@ -67,10 +67,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const canvas = document.getElementById('weightChart');
     if (!canvas) return;
 
-    const goalRaw      = canvas.dataset.goal;
-    const paceRaw      = canvas.dataset.weeklyPace;
-    const goalWeight   = goalRaw  !== '' && !isNaN(+goalRaw)  ? +goalRaw  : null;
-    const weeklyPace   = paceRaw  !== '' && !isNaN(+paceRaw)  ? +paceRaw  : null;
+    const goalRaw          = canvas.dataset.goal;
+    const paceRaw          = canvas.dataset.weeklyPace;
+    const committedPaceRaw = canvas.dataset.committedPace;
+    const goalWeight       = goalRaw          !== '' && !isNaN(+goalRaw)          ? +goalRaw          : null;
+    const weeklyPace       = paceRaw          !== '' && !isNaN(+paceRaw)          ? +paceRaw          : null;
+    // committedPace is kg/week (positive number); negate it to match the convention
+    // that weeklyPace < 0 means losing weight.
+    const committedPace    = committedPaceRaw !== '' && !isNaN(+committedPaceRaw) ? -(+committedPaceRaw) : null;
 
     fetch('/api/entries')
         .then(r => r.json())
@@ -85,7 +89,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const weights = data.map(e => e.weight);
             const emaData = buildEma(weights);
 
-            const { futureLabels, futureWeights } = buildForecast(dates, weights, weeklyPace, goalWeight);
+            // Use the committed-rate pace for the forecast line when set;
+            // fall back to the actual weekly pace extrapolation.
+            const forecastPace = committedPace !== null ? committedPace : weeklyPace;
+            const { futureLabels, futureWeights } = buildForecast(dates, weights, forecastPace, goalWeight);
 
             // allLabels includes future dates; chart starts with historical only
             const allLabels = [...dates, ...futureLabels];
@@ -143,7 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             spanGaps: false,
                         },
                         {
-                            label: 'Forecast',
+                            label: committedPace !== null ? 'Target Pace' : 'Forecast',
                             data: forecastData,
                             borderColor: 'rgba(71, 234, 237, 0.45)',
                             backgroundColor: 'transparent',
@@ -185,7 +192,10 @@ document.addEventListener('DOMContentLoaded', () => {
                                 label: item => {
                                     if (item.parsed.y === null) return null;
                                     if (item.datasetIndex === 1) return null; // hide EMA from tooltip
-                                    const suffix = item.datasetIndex === 2 ? ' (forecast)' : '';
+                                    const isTarget = committedPace !== null;
+                                    const suffix = item.datasetIndex === 2
+                                        ? (isTarget ? ' (target)' : ' (forecast)')
+                                        : '';
                                     return `${item.parsed.y} kg${suffix}`;
                                 },
                                 filter: item => item.parsed.y !== null && item.datasetIndex !== 1,
@@ -225,7 +235,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const toggleBtn = document.getElementById('forecast-toggle');
             if (toggleBtn) {
                 // Disable button if there's no pace data to project from
-                if (weeklyPace === null || futureLabels.length === 0) {
+                if (forecastPace === null || futureLabels.length === 0) {
                     toggleBtn.disabled = true;
                     toggleBtn.title = 'Not enough data for a forecast yet';
                     toggleBtn.classList.add('opacity-40', 'cursor-not-allowed');
