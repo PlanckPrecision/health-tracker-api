@@ -56,8 +56,8 @@ docker compose exec web flask db upgrade
 | App | http://localhost:5000 |
 | pgAdmin | http://localhost:5050 |
 
-pgAdmin credentials: `admin@admin.com` / `admin`
-Database connection: host `db`, user `myuser`, password `mypassword`, db `healthtracker`
+pgAdmin credentials (defaults from `.env`): `admin@admin.com` / `admin`
+Database connection (set in `.env`): host `db`, user `${DB_USER}`, password `${DB_PASSWORD}`, db `${DB_NAME}`
 
 ---
 
