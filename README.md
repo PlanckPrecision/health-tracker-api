@@ -5,7 +5,7 @@
 ![Flask](https://img.shields.io/badge/flask-3.1-lightgrey)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
-I've been logging my weight daily for years and couldn't find a tool that balanced simplicity with meaningful analytics, thus I built one myself. Weightborne is a full stack Flask web app with SQLAlchemy backed data persistence, a session auth system, and a Chart.js dashboard that computes pace based forecasting from a rolling weekly average to project your goal date in real time. The goal was a clean, dark-themed UI with no bloat, just the metrics that I want when I am tracking my weight towards a given goal.
+I've been logging my weight daily for years and couldn't find a tool that balanced simplicity with meaningful analytics, so I built one myself. Weightborne is a full-stack Flask web app with a pace-based forecasting engine, a multi-user auth system, and a Chart.js dashboard that projects your goal date in real time from a rolling weekly average. Fully containerised with Docker and backed by PostgreSQL.
 
 ![Dashboard screenshot](app/static/images/landingpage.png)
 
@@ -13,12 +13,14 @@ I've been logging my weight daily for years and couldn't find a tool that balanc
 
 ## Features
 
-- **Daily logging** — enter weight by date with validation (range, decimal precision, duplicate guard)
-- **Delete entries** — remove individual log entries from the history table
-- **Dashboard analytics** — Starting weight, 7-day pace, 30-day loss, all-time loss, and dynamic forecast to goal date
-- **Interactive chart** — toggle a forecast overlay projected from your current weekly pace to visualise on what date the goal weight will be achieved, based on current metrics and trends
-- **Goal tracking** — set a target weight; progress bar and estimated time of arrival for goal date update automatically
-- **Auth** — signup, login, change username/password, reset journey (requires password + typed "RESET")
+- **Daily weight logging** — date picker, input validation (range, decimal precision, duplicate guard)
+- **Dashboard analytics** — starting weight, 7-day rolling average, weekly pace, 30-day loss, all-time loss
+- **Pace-based forecasting** — computes weeks and exact goal date from both your current pace and your committed target pace, shown side by side so you can see if you're ahead or behind
+- **Interactive chart** — toggle a forecast or target-pace overlay to visualise your projected goal date on the chart
+- **Goal tracking** — set a target weight and weekly loss rate; progress bar and ETA update automatically on every log
+- **Auth system** — signup, login, forgot/reset password via email token (30 min expiry), change username/password, reset journey (requires password confirmation + typing "RESET")
+- **Rate limiting** — Flask-Limiter backed by Redis, applied to auth endpoints to prevent brute force
+- **CSRF protection** — Flask-WTF CSRF tokens on all forms
 - **Session security** — `SameSite=Strict`, `HttpOnly` cookies, Werkzeug password hashing
 
 ---
@@ -27,26 +29,35 @@ I've been logging my weight daily for years and couldn't find a tool that balanc
 
 | Layer | Technology |
 |---|---|
-| Backend | Python 3.12, Flask, SQLAlchemy |
-| Auth | Flask-Login, Werkzeug |
-| Database | SQLite (dev) via Flask-Migrate |
+| Backend | Python 3.12, Flask 3.1, SQLAlchemy |
+| Auth | Flask-Login, Werkzeug, itsdangerous (signed tokens) |
+| Database | PostgreSQL 16 (Docker) via Flask-Migrate / Alembic |
+| Rate limiting | Flask-Limiter + Redis |
 | Frontend | Jinja2, Tailwind CSS (CDN), Chart.js v4 |
+| Infrastructure | Docker, Docker Compose, pgAdmin 4 |
+| Testing | Pytest, GitHub Actions CI |
 
 ---
 
-## Quickstart
+## Quickstart (Docker)
+
+Requirements: [Docker Desktop](https://www.docker.com/products/docker-desktop/) or Docker + Docker Compose.
 
 ```bash
 git clone https://github.com/PlanckPrecision/health-tracker-api.git
 cd health-tracker-api
-python -m venv .venv && source .venv/bin/activate
-pip install -e ".[dev]"
-cp .env.example .env          # add a SECRET_KEY value
-flask db upgrade
-python main.py
+cp .env.example .env        # fill in SECRET_KEY and mail settings
+docker compose up -d
+docker compose exec web flask db upgrade
 ```
 
-Open `http://127.0.0.1:5000`.
+| Service | URL |
+|---|---|
+| App | http://localhost:5000 |
+| pgAdmin | http://localhost:5050 |
+
+pgAdmin credentials: `admin@admin.com` / `admin`
+Database connection: host `db`, user `myuser`, password `mypassword`, db `healthtracker`
 
 ---
 
@@ -55,16 +66,18 @@ Open `http://127.0.0.1:5000`.
 ```
 health-tracker-api/
 ├── app/
-│   ├── __init__.py       # app factory
-│   ├── models.py         # database models
-│   ├── validate.py       # input validation and stat calculations
+│   ├── __init__.py         # app factory, extensions (db, limiter, mail, csrf)
+│   ├── models.py           # User, Entry, Goal — SQLAlchemy ORM models
+│   ├── validate.py         # input validation + all stat/forecast calculations
 │   ├── routes/
-│   │   ├── auth.py       # authentication routes
-│   │   └── entries.py    # weight entry and dashboard routes
-│   ├── templates/        # Jinja2 HTML templates
-│   └── static/           # JS and images
-├── migrations/           # Alembic migration scripts
+│   │   ├── auth.py         # signup, login, logout, password reset flow
+│   │   └── entries.py      # dashboard, weight logging, goal management
+│   ├── templates/          # Jinja2 HTML templates
+│   └── static/             # Chart.js logic, datepicker, images
+├── migrations/             # Alembic migration scripts
 ├── tests/
+├── docker-compose.yml
+├── Dockerfile
 ├── main.py
 └── pyproject.toml
 ```
@@ -77,16 +90,14 @@ Copy `.env.example` to `.env` and fill in:
 
 ```
 SECRET_KEY=your-secret-key-here
+
+# Optional: email for password reset flow
+MAIL_SERVER=smtp.example.com
+MAIL_PORT=587
+MAIL_USERNAME=you@example.com
+MAIL_PASSWORD=yourpassword
+MAIL_DEFAULT_SENDER=you@example.com
 ```
-
----
-
-## Roadmap
-
-- [x] Pytest suite for auth and validation
-- [x] GitHub Actions CI (lint + test on push)
-- [ ] PostgreSQL support for production deployment
-- [ ] Export entries as CSV
 
 ---
 
@@ -98,6 +109,13 @@ SECRET_KEY=your-secret-key-here
 
 ---
 
-## Demo
+## Roadmap
+
+- [x] Pytest suite for auth and validation
+- [x] GitHub Actions CI (lint + test on push)
+- [x] PostgreSQL + Docker containerisation
+- [x] Rate limiting with Redis
+- [x] Password reset via email token
+- [ ] Export entries as CSV
 
 
