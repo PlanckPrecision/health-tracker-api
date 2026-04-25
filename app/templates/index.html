@@ -42,6 +42,7 @@
                 </h1>
 
                 <form action="register" method="post" class="space-y-4">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <div>
                         <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Weight (kg)</label>
                         <input autocomplete="off" autofocus name="weight" placeholder="00.0" type="text"
@@ -51,7 +52,7 @@
                     <div>
                         <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Date</label>
                         <input id="date-input" name="date" type="text" value="{{ today }}" readonly
-                               class="w-full bg-surface-container-highest/50 border-outline-variant rounded-xl text-slate-400 py-3 px-4 cursor-not-allowed">
+                               class="w-full bg-surface-container-highest/50 border-outline-variant rounded-xl text-slate-400 py-3 px-4 cursor-pointer hover:shadow-[0_0_12px_rgba(71,234,237,0.4)] transition-shadow">
                     </div>
 
                     <button type="submit" class="w-full bg-primary text-on-primary font-bold py-4 rounded-xl hover:brightness-110 active:scale-[0.98] transition-all shadow-[0_0_20px_rgba(71,234,237,0.3)]">
@@ -85,14 +86,15 @@
                         aria-pressed="false"
                         class="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full border border-outline-variant/30 text-slate-500 hover:border-primary/50 hover:text-primary transition-all">
                         <span class="material-symbols-outlined" style="font-size:14px;">show_chart</span>
-                        Forecast
+                        {{ "Target" if stats.committed_kg_per_week is not none else "Forecast" }}
                     </button>
                 </div>
 
                 <div class="relative h-[300px] w-full">
                     <canvas id="weightChart"
                         data-goal="{{ stats.goal_weight or '' }}"
-                        data-weekly-pace="{{ stats.weekly_pace if stats.weekly_pace is not none else '' }}"></canvas>
+                        data-weekly-pace="{{ stats.weekly_pace if stats.weekly_pace is not none else '' }}"
+                        data-committed-pace="{{ stats.committed_kg_per_week if stats.committed_kg_per_week is not none else '' }}"></canvas>
                 </div>
             </div>
         </div>
@@ -125,7 +127,11 @@
     </div>
     <div class="flex items-center text-xs mt-2 {% if stats.weekly_trend == 'down' %}text-green-400{% elif stats.weekly_trend == 'up' %}text-error{% else %}text-slate-500{% endif %}">
       <span class="material-symbols-outlined text-sm">{% if stats.weekly_trend == 'down' %}trending_down{% elif stats.weekly_trend == 'up' %}trending_up{% else %}remove{% endif %}</span>
-      <span class="ml-1">{{ stats.weekly_pace_label }}</span>
+      {% if stats.committed_kg_per_week is not none %}
+        <span class="ml-1">Target: <span class="font-semibold">{{ "%.2f"|format(stats.committed_kg_per_week) }} kg/week</span></span>
+      {% else %}
+        <span class="ml-1">{% if stats.weekly_trend == 'down' %}On track to lose weight{% elif stats.weekly_trend == 'up' %}Trend moving against goal{% else %}No change this week{% endif %}</span>
+      {% endif %}
     </div>
   </div>
 
@@ -193,7 +199,7 @@
       {% endif %}
     </div>
     <div class="flex items-center text-xs mt-2 text-slate-500">
-      <span class="material-symbols-outlined text-sm">{% if stats.lost_all_time is not none and stats.lost_all_time > 0 %}moving{% elif stats.lost_all_time is not none and stats.lost_all_time < 0 %}trending_up{% else %}remove{% endif %}</span>
+      <span class="material-symbols-outlined text-sm">{% if stats.lost_all_time is not none and stats.lost_all_time > 0 %}trending_down{% elif stats.lost_all_time is not none and stats.lost_all_time < 0 %}trending_up{% else %}remove{% endif %}</span>
       <span class="ml-1">{% if stats.lost_all_time is not none and stats.lost_all_time > 0 %}Lost since starting weight{% elif stats.lost_all_time is not none and stats.lost_all_time < 0 %}Gained since starting weight{% else %}Not enough data{% endif %}</span>
     </div>
   </div>
@@ -214,31 +220,72 @@
     <div class="space-y-6">
     <h3 class="text-3xl font-bold tracking-tight text-on-surface">Intelligent Forecasting</h3>
 
-    {% if stats.goal_weight is not none and stats.forecast_date is not none %}
-      <p class="text-secondary leading-relaxed">
-        At your current pace of
-        <span class="text-primary font-bold">{{ stats.weekly_pace_label }}</span>,
-        you'll reach your goal of
-        <span class="text-primary font-bold">{{ "%.1f"|format(stats.goal_weight) }} kg</span>
-        in approximately <span class="text-on-surface font-semibold">{{ stats.forecast_weeks }} weeks</span>
-        — by <span class="text-primary font-bold">{{ stats.forecast_date.strftime("%B %d, %Y") }}</span>.
-      </p>
-    {% elif stats.goal_weight is not none and stats.weekly_pace is not none and stats.weekly_pace >= 0 %}
-      <p class="text-secondary leading-relaxed">
-        Your current pace shows a weekly gain of
-        <span class="text-error font-bold">{{ stats.weekly_pace_label }}</span>.
-        Reverse the trend to unlock a goal forecast.
-      </p>
-    {% elif stats.goal_weight is none %}
+    {% if stats.goal_weight is none %}
       <p class="text-secondary leading-relaxed">
         No goal set yet. Head to
         <a href="/goals" class="text-primary font-semibold hover:underline">Goals</a>
         to set a target weight and unlock forecasting.
       </p>
     {% else %}
-      <p class="text-secondary leading-relaxed">
-        Not enough data to forecast yet. Keep logging daily and your projection will appear here.
-      </p>
+      <div class="grid grid-cols-2 gap-4">
+
+        {# Target Pace card #}
+        {% if stats.committed_forecast_date is not none %}
+          <div class="glass-panel border border-outline-variant/30 rounded-xl p-4">
+            <div class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-3">Target Pace</div>
+            <div class="text-2xl font-extrabold text-primary leading-none">
+              {{ "%.2f"|format(stats.committed_kg_per_week) }}<span class="text-sm font-normal text-slate-500 ml-1">kg/week</span>
+            </div>
+            <p class="text-xs text-slate-500 mt-2">You will reach your goal in:</p>
+            <p class="text-xs text-slate-400 font-semibold">{{ stats.committed_forecast_weeks }} weeks on {{ stats.committed_forecast_date.strftime("%b %d, %Y") }}</p>
+          </div>
+        {% elif stats.weekly_loss_pct is not none %}
+          <div class="glass-panel border border-outline-variant/30 rounded-xl p-4">
+            <div class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-3">Target Pace</div>
+            <div class="text-2xl font-extrabold text-primary leading-none">
+              {{ "%.2f"|format(stats.weekly_loss_pct) }}<span class="text-sm font-normal text-slate-500 ml-1">%/wk</span>
+            </div>
+            <div class="text-xs text-slate-500 mt-2">Log more to forecast</div>
+          </div>
+        {% else %}
+          <div class="glass-panel border border-outline-variant/30 rounded-xl p-4 flex items-center justify-center">
+            <p class="text-xs text-slate-500 text-center"><a href="/goals" class="text-primary hover:underline">Set a target</a><br>to unlock forecast</p>
+          </div>
+        {% endif %}
+
+        {# Current Pace card #}
+        {% if stats.forecast_date is not none %}
+          <div class="glass-panel border border-outline-variant/30 rounded-xl p-4">
+            <div class="flex items-center justify-between mb-3">
+              <div class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Current Pace</div>
+              {% if stats.committed_forecast_date is not none %}
+                {% if stats.forecast_date <= stats.committed_forecast_date %}
+                  <span class="text-[9px] font-bold uppercase tracking-widest text-green-400 bg-green-400/10 px-2 py-0.5 rounded-full">Ahead</span>
+                {% else %}
+                  <span class="text-[9px] font-bold uppercase tracking-widest text-error bg-error/10 px-2 py-0.5 rounded-full">Behind</span>
+                {% endif %}
+              {% endif %}
+            </div>
+            <div class="text-2xl font-extrabold text-on-surface leading-none">{{ "%+.2f"|format(stats.weekly_pace) }}<span class="text-sm font-normal text-slate-500 ml-1">kg/week</span></div>
+            <p class="text-xs text-slate-500 mt-2">You will reach your goal in:</p>
+            <p class="text-xs text-slate-400 font-semibold">{{ stats.forecast_weeks }} weeks on {{ stats.forecast_date.strftime("%b %d, %Y") }}</p>
+          </div>
+        {% elif stats.weekly_pace is not none and stats.weekly_pace >= 0 %}
+          <div class="glass-panel border border-outline-variant/30 rounded-xl p-4">
+            <div class="flex items-center justify-between mb-3">
+              <div class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Current Pace</div>
+              <span class="text-[9px] font-bold uppercase tracking-widest text-error bg-error/10 px-2 py-0.5 rounded-full">Gaining</span>
+            </div>
+            <div class="text-2xl font-extrabold text-error leading-none">{{ stats.weekly_pace_label }}</div>
+            <div class="text-xs text-slate-500 mt-2">Reverse trend to forecast</div>
+          </div>
+        {% else %}
+          <div class="glass-panel border border-outline-variant/30 rounded-xl p-4 flex items-center justify-center">
+            <p class="text-xs text-slate-500 text-center">Keep logging daily<br>to unlock forecast</p>
+          </div>
+        {% endif %}
+
+      </div>
     {% endif %}
 
     <div class="space-y-2">

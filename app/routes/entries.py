@@ -1,8 +1,10 @@
-from flask import Blueprint, render_template, request, jsonify, session
+from datetime import date, datetime
+
+from flask import Blueprint, flash, jsonify, redirect, render_template, request, session, url_for
 from flask_login import current_user, login_required
-from datetime import datetime, date
+
 from app import db
-from app.models import Entry, Goal, Measurement
+from app.models import Entry, Goal
 from app.validate import check_weight, get_dashboard_stats
 
 entries_bp = Blueprint("entries", __name__)
@@ -127,6 +129,7 @@ def goals():
 
     start_weight_raw = request.form.get("start_weight", "").strip()
     goal_weight_raw = request.form.get("goal_weight", "").strip()
+    weekly_loss_pct_raw = request.form.get("weekly_loss_pct", "").strip()
 
     is_valid_start, start_result = check_weight(start_weight_raw)
     if not is_valid_start:
@@ -144,15 +147,35 @@ def goals():
             goal=existing_goal,
         )
 
+    weekly_loss_pct = None
+    if weekly_loss_pct_raw:
+        weekly_loss_pct_raw = weekly_loss_pct_raw.replace(",", ".")
+        try:
+            weekly_loss_pct = float(weekly_loss_pct_raw)
+            if weekly_loss_pct <= 0 or weekly_loss_pct > 100:
+                return render_template(
+                    "goals.html",
+                    message="Weekly loss rate must be a positive percentage.",
+                    goal=existing_goal,
+                )
+        except ValueError:
+            return render_template(
+                "goals.html",
+                message="Weekly loss rate must be a number (e.g. 0.75).",
+                goal=existing_goal,
+            )
+
     if current_user.is_authenticated:
         if existing_goal:
             existing_goal.goal_weight = goal_result
             existing_goal.start_weight = start_result
+            existing_goal.weekly_loss_pct = weekly_loss_pct
         else:
             db.session.add(Goal(
                 user_id=current_user.id,
                 goal_weight=goal_result,
                 start_weight=start_result,
+                weekly_loss_pct=weekly_loss_pct,
             ))
         db.session.commit()
         message = f"Goal saved! Targeting {goal_result} kg from {start_result} kg."
@@ -169,57 +192,18 @@ def goals():
         message=message,
         goal_weight=goal_result,
         start_weight=start_result,
+        weekly_loss_pct=weekly_loss_pct,
     )
 
 
-@entries_bp.route("/measurements", methods=["GET", "POST"])
+
+
+
+@entries_bp.route("/entries/<int:entry_id>/delete", methods=["POST"])
 @login_required
-def measurements():
-    if request.method == "POST":
-        date_raw = request.form.get("date", "").strip()
-        try:
-            entry_date = datetime.strptime(date_raw, "%d.%m.%Y").date() if date_raw else date.today()
-        except ValueError:
-            entry_date = date.today()
-
-        def parse_cm(field):
-            val = request.form.get(field, "").strip().replace(",", ".")
-            try:
-                v = float(val)
-                return v if 0 < v < 500 else None
-            except ValueError:
-                return None
-
-        waist    = parse_cm("waist")
-        hips     = parse_cm("hips")
-        chest    = parse_cm("chest")
-        neck     = parse_cm("neck")
-        body_fat = parse_cm("body_fat")
-
-        existing = Measurement.query.filter_by(user_id=current_user.id, date=entry_date).first()
-        if existing:
-            existing.waist    = waist
-            existing.hips     = hips
-            existing.chest    = chest
-            existing.neck     = neck
-            existing.body_fat = body_fat
-        else:
-            db.session.add(Measurement(
-                user_id=current_user.id,
-                date=entry_date,
-                waist=waist,
-                hips=hips,
-                chest=chest,
-                neck=neck,
-                body_fat=body_fat,
-            ))
-        db.session.commit()
-
-    records = (
-        Measurement.query
-        .filter_by(user_id=current_user.id)
-        .order_by(Measurement.date.desc())
-        .all()
-    )
-    today = date.today().strftime("%d.%m.%Y")
-    return render_template("measurements.html", records=records, today=today)
+def delete_entry(entry_id):
+    entry = Entry.query.filter_by(id=entry_id, user_id=current_user.id).first_or_404()
+    db.session.delete(entry)
+    db.session.commit()
+    flash("Entry deleted.", "success")
+    return redirect(url_for("entries.history"))
